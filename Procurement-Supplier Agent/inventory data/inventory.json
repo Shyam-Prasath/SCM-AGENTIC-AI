@@ -1,0 +1,16 @@
+[
+    {
+        "sku": "ELC-1003",
+        "warehouse": "North DC",
+        "region": "North",
+        "reorder_qty": 1332,
+        "priority": "HIGH"
+    },
+    {
+        "sku": "ELC-1005",
+        "warehouse": "North DC",
+        "region": "North",
+        "reorder_qty": 175,
+        "priority": "MEDIUM"
+    }
+]
