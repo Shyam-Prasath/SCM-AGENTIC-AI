@@ -1,28 +1,58 @@
+import os
 import sqlite3
 
-from crewai import Agent
+from dotenv import load_dotenv
+
+from crewai import Agent, Task, Crew, LLM
 from crewai.tools import tool
+
+# =====================================================
+# Load Environment Variables
+# =====================================================
+
+load_dotenv()
+
+# =====================================================
+# Azure OpenAI LLM
+# =====================================================
+
+gpt_llm = LLM(
+    model=f"azure/{os.getenv('AZURE_OPENAI_DEPLOYMENT')}",
+    api_key=os.getenv("AZURE_OPENAI_KEY"),
+    api_base=os.getenv("AZURE_OPENAI_ENDPOINT"),
+    api_version=os.getenv("AZURE_OPENAI_API_VERSION"),
+    temperature=0.2
+)
+
+# =====================================================
+# Database Configuration
+# =====================================================
 
 DB_PATH = "data/scm.sqlite"
 
-
 # =====================================================
 # TOOL 1
-# Inventory Q&A Tool (UC-1)
+# Inventory Database Tool
 # =====================================================
 
-@tool("Inventory Database Tool")
-def inventory_db_tool(question: str) -> str:
+@tool
+def inventory_db(question: str) -> str:
     """
-    Answer inventory-related questions using SCM database.
+    Query inventory database and answer inventory questions.
+
+    Example:
+    - Which SKUs are below reorder level in the North warehouse?
+    - Show all low stock products.
     """
 
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
 
-    question = question.lower()
-
     try:
+
+        question = question.lower()
+
+        # UC-1
 
         if (
             "below reorder" in question
@@ -41,7 +71,7 @@ def inventory_db_tool(question: str) -> str:
             JOIN products p
                 ON p.sku = i.sku
             WHERE i.region = 'North'
-              AND i.on_hand < i.reorder_point
+            AND i.on_hand < i.reorder_point
             ORDER BY
                 (i.reorder_point - i.on_hand) DESC
             """
@@ -68,9 +98,10 @@ def inventory_db_tool(question: str) -> str:
             """
 
         else:
+
             return (
                 "Unsupported inventory question. "
-                "Ask about low stock items or reorder levels."
+                "Ask about low stock or reorder levels."
             )
 
         cursor.execute(query)
@@ -80,11 +111,11 @@ def inventory_db_tool(question: str) -> str:
         if not rows:
             return "No matching inventory records found."
 
-        result = []
+        output = []
 
         for row in rows:
 
-            result.append(
+            output.append(
                 f"""
 SKU: {row[0]}
 Product: {row[1]}
@@ -95,31 +126,29 @@ Reorder Quantity: {row[5]}
 """
             )
 
-        return "\n".join(result)
+        return "\n".join(output)
 
-    except Exception as e:
+    except Exception as ex:
 
-        return f"Database Error: {str(e)}"
+        return f"Database Error: {str(ex)}"
 
     finally:
+
         conn.close()
 
 
 # =====================================================
 # TOOL 2
 # Low Stock Scanner
-# Used by Procurement Agent later
 # =====================================================
 
-@tool("Low Stock Scanner")
-def get_low_stock_items(dummy_input: str = "") -> str:
+@tool
+def low_stock_scanner(dummy_input: str = "") -> str:
     """
-    Return all SKUs below reorder point,
-    prioritized by shortage severity.
+    Returns all SKUs below reorder level.
     """
 
     conn = sqlite3.connect(DB_PATH)
-
     cursor = conn.cursor()
 
     try:
@@ -148,15 +177,12 @@ def get_low_stock_items(dummy_input: str = "") -> str:
         if not rows:
             return "No low stock items found."
 
-        output = []
-
-        rank = 1
+        result = []
 
         for row in rows:
 
-            output.append(
+            result.append(
                 f"""
-Priority: {rank}
 SKU: {row[0]}
 Product: {row[1]}
 Warehouse: {row[2]}
@@ -168,13 +194,11 @@ Shortage: {row[7]}
 """
             )
 
-            rank += 1
+        return "\n".join(result)
 
-        return "\n".join(output)
+    except Exception as ex:
 
-    except Exception as e:
-
-        return f"Database Error: {str(e)}"
+        return f"Database Error: {str(ex)}"
 
     finally:
 
@@ -183,33 +207,31 @@ Shortage: {row[7]}
 
 # =====================================================
 # TOOL 3
-# SKU Profile Lookup
-# Useful for inventory investigations
+# SKU Lookup
 # =====================================================
 
-@tool("SKU Profile Lookup")
-def sku_profile_tool(sku: str) -> str:
+@tool
+def sku_profile(sku: str) -> str:
     """
-    Return complete SKU information.
+    Retrieve product information for a SKU.
     """
 
     conn = sqlite3.connect(DB_PATH)
-
     cursor = conn.cursor()
 
     try:
 
         query = """
         SELECT
-            p.sku,
-            p.product_name,
-            p.category,
-            p.subcategory,
-            p.brand,
-            p.unit_price,
-            p.weight_kg
-        FROM products p
-        WHERE p.sku = ?
+            sku,
+            product_name,
+            category,
+            subcategory,
+            brand,
+            unit_price,
+            weight_kg
+        FROM products
+        WHERE sku = ?
         """
 
         cursor.execute(query, (sku,))
@@ -229,9 +251,9 @@ Unit Price: ${row[5]}
 Weight: {row[6]} kg
 """
 
-    except Exception as e:
+    except Exception as ex:
 
-        return f"Database Error: {str(e)}"
+        return f"Database Error: {str(ex)}"
 
     finally:
 
@@ -239,49 +261,96 @@ Weight: {row[6]} kg
 
 
 # =====================================================
-# CREWAI AGENT
+# INVENTORY AGENT
 # =====================================================
 
 inventory_monitoring_agent = Agent(
-    role="Inventory Monitoring Specialist",
+
+    role="Inventory Monitoring Agent",
 
     goal="""
-Monitor inventory levels across warehouses,
-identify products below reorder thresholds,
-prioritize replenishment requirements,
-answer inventory-related business questions,
-and provide accurate inventory insights
-using the Inventory Database.
+Monitor inventory levels,
+identify low-stock items,
+answer inventory-related questions,
+and provide replenishment insights.
 """,
 
     backstory="""
-You are a senior inventory analyst at HexaShop.
+You are the Inventory Monitoring Agent for HexaShop.
 
-Your responsibility is to continuously monitor
-stock levels across all warehouses and identify
-potential inventory risks before they impact customers.
+Use ONLY the inventory_db tool for stock numbers.
 
-You specialize in:
+Never invent values.
 
-- Inventory monitoring
-- Reorder analysis
-- SKU investigations
-- Stock shortage prioritization
-- Inventory reporting
+If inventory information is unavailable,
+clearly say so.
 
-You always use data from the Inventory Database Tool.
-You never assume inventory values or fabricate numbers.
-
-All answers must be grounded in actual inventory records.
+All responses must be grounded in database results.
 """,
 
     tools=[
-        inventory_db_tool,
-        get_low_stock_items,
-        sku_profile_tool
+        inventory_db,
+        low_stock_scanner,
+        sku_profile
     ],
+
+    llm=gpt_llm,
 
     verbose=True,
 
-    allow_delegation=False,
+    allow_delegation=False
 )
+
+# =====================================================
+# LOCAL TEST
+# =====================================================
+
+if __name__ == "__main__":
+
+    while True:
+
+        user_query = input(
+            "\nAsk Inventory Agent: "
+        )
+
+        if user_query.lower() in [
+            "exit",
+            "quit"
+        ]:
+            break
+
+        inventory_task = Task(
+
+            description=f"""
+            Answer the following inventory question.
+
+            Question:
+            {user_query}
+
+            Rules:
+            - Use Inventory Database Tool.
+            - Never invent stock values.
+            - Use actual database values.
+            """,
+
+            expected_output="""
+            Grounded inventory answer
+            using actual inventory data.
+            """,
+
+            agent=inventory_monitoring_agent
+        )
+
+        crew = Crew(
+            agents=[inventory_monitoring_agent],
+            tasks=[inventory_task],
+            verbose=True
+        )
+
+        result = crew.kickoff()
+
+        print("\n")
+        print("=" * 60)
+        print("FINAL ANSWER")
+        print("=" * 60)
+        print(result)
