@@ -28,7 +28,10 @@ gpt_llm = LLM(
 # Database Configuration
 # =====================================================
 
-DB_PATH = "data/scm.sqlite"
+import os
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DB_PATH = os.path.join(BASE_DIR, "data", "scm.sqlite")
 
 # =====================================================
 # TOOL 1

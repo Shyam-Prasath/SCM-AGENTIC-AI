@@ -16,8 +16,11 @@ gpt_llm = LLM(
     api_version=os.getenv("AZURE_OPENAI_API_VERSION")
 )
 
-customers_df = pd.read_csv("customers.csv")
-orders_df = pd.read_csv("orders.csv")
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DB_PATH = os.path.join(BASE_DIR, "data", "customers.csv")
+DB_PATH1 = os.path.join(BASE_DIR, "data", "customers.csv")
+customers_df = pd.read_csv(DB_PATH)
+orders_df = pd.read_csv(DB_PATH1)
 
 print("=" * 60)
 print("HexaShop AI Customer Communication Agent")
