@@ -126,6 +126,11 @@ Qty: {customer["quantity"]}
 Status: {customer["order_status"]}
 Priority: {priority}
 
+Write:
+1. Subject
+2. Customer email
+3. Manager summary (NA if priority is not HIGH)
+
 Use the order status to decide the message.
 
 Format:
@@ -137,6 +142,7 @@ Manager Summary:
     response = llm.invoke(prompt)
 
     output = response.content
+    
 
     subject = ""
     email = ""
@@ -148,8 +154,8 @@ Manager Summary:
 
         line = line.strip()
 
-        if line.startswith("Subject"):
-            current = "subject"
+        if line.startswith("Subject:"):
+            subject = line.replace("Subject:", "").strip()
             continue
 
         elif line.startswith("Email"):
@@ -173,7 +179,7 @@ Manager Summary:
 
     print("\nEmail")
     print("--------------------------------------")
-    print("Subject: ", subject)
+    print("Subject: ",subject)
     print("--------------------------------------")
     print(email)
 
