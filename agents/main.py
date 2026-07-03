@@ -1,7 +1,7 @@
 import json
 from crewai import Crew, Task, Process
-from agent.agent import get_procurement_agent
-from prompt_structure.prompt import PROCUREMENT_PROMPT
+from agent import get_procurement_agent
+from prompts.prompt import PROCUREMENT_PROMPT
 
 with open("inventory data/inventory.json", "r") as file:
     inventory_data = json.load(file)

@@ -1,20 +1,21 @@
 import os
 from dotenv import load_dotenv
 from crewai import Agent, LLM
-from tools.supplier_tool import supplier_tool
-from tools.calculator_tool import calculator_tool
-from tools.approval_tool import approval_tool
+from tools.supplier_tool import SupplierTool
+from tools.calculator_tool import CalculatorTool
+from tools.approval_tool import ApprovalTool
 
 # Load environment variables
 load_dotenv()
 
 # Azure OpenAI LLM
 llm = LLM(
-    model=os.getenv("AZURE_OPENAI_DEPLOYMENT"),
+    model=f"azure/{os.getenv('AZURE_OPENAI_DEPLOYMENT')}",
     api_key=os.getenv("AZURE_OPENAI_KEY"),
-    base_url=os.getenv("AZURE_OPENAI_ENDPOINT"),
-    api_version=os.getenv("AZURE_OPENAI_API_VERSION"),
+    api_base=os.getenv("AZURE_OPENAI_ENDPOINT"),
+    api_version=os.getenv("AZURE_OPENAI_API_VERSION")
 )
+
 
 
 def get_procurement_agent():
@@ -39,9 +40,9 @@ def get_procurement_agent():
         ),
         llm=llm,
         tools=[
-            supplier_tool,
-            calculator_tool,
-            approval_tool,
+            SupplierTool(),
+            CalculatorTool(),
+            ApprovalTool(),
         ],
         allow_delegation=False,
         verbose=True,
