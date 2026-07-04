@@ -5,9 +5,6 @@ from dotenv import load_dotenv
 from crewai import Agent, Task, Crew, LLM
 from crewai.tools import tool
 
-# ---------------------------------------------------
-# Load Environment Variables
-# ---------------------------------------------------
 
 load_dotenv()
 
@@ -69,10 +66,6 @@ Order Date : {order.iloc[0]['order_date']}
 Promised Date : {order.iloc[0]['promised_date']}
 """
 
-
-# ---------------------------------------------------
-# Business Logic
-# ---------------------------------------------------
 
 def calculate_priority(status: str, tier: str):
 
