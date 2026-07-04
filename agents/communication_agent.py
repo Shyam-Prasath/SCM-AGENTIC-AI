@@ -5,6 +5,9 @@ from dotenv import load_dotenv
 from crewai import Agent, Task, Crew, LLM
 from crewai.tools import tool
 
+# ---------------------------------------------------
+# Load Environment Variables
+# ---------------------------------------------------
 
 load_dotenv()
 
@@ -66,6 +69,10 @@ Order Date : {order.iloc[0]['order_date']}
 Promised Date : {order.iloc[0]['promised_date']}
 """
 
+
+# ---------------------------------------------------
+# Business Logic
+# ---------------------------------------------------
 
 def calculate_priority(status: str, tier: str):
 
@@ -212,7 +219,7 @@ Manager Summary:
 """,
 
     agent=communication_agent
-)
+    )
 
     crew = Crew(
 
@@ -230,44 +237,41 @@ Manager Summary:
     output = str(result)
 
     subject = ""
-email = ""
-manager = ""
+    email = ""
+    manager = ""
+    current = None
 
-current = None
+    for line in output.splitlines():
+        line = line.strip()
 
-for line in output.splitlines():
+        if line.lower().startswith("subject:"):
+            current = "subject"
+            subject = line.split(":", 1)[1].strip()
+            continue
 
-    line = line.strip()
+        elif line.lower().startswith("email:"):
+            current = "email"
+            email = line.split(":", 1)[1].strip()
+            continue
 
-    if line.lower().startswith("subject:"):
-        current = "subject"
-        subject = line.split(":", 1)[1].strip()
-        continue
+        elif line.lower().startswith("manager summary:"):
+            current = "manager"
+            manager = line.split(":", 1)[1].strip()
+            continue
 
-    elif line.lower().startswith("email:"):
-        current = "email"
-        email = line.split(":", 1)[1].strip()
-        continue
+        if current == "subject":
+            subject += "\n" + line
 
-    elif line.lower().startswith("manager summary:"):
-        current = "manager"
-        manager = line.split(":", 1)[1].strip()
-        continue
+        elif current == "email":
+            email += "\n" + line
 
-    if current == "subject":
-        subject += "\n" + line
-
-    elif current == "email":
-        email += "\n" + line
-
-    elif current == "manager":
-        manager += "\n" + line
+        elif current == "manager":
+            manager += "\n" + line
 
 
     print("\n" + "=" * 60)
     print("Email")
     print("=" * 60)
-
     print("\nSubject",subject.strip())
     print("-" * 60)
     print(email.strip())
@@ -283,5 +287,4 @@ for line in output.splitlines():
     print("\n" + "=" * 60)
     print("Communication Generated Successfully")
     print("=" * 60)
-
     print("\nReady to send notification.")
