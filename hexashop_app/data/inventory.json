@@ -1,0 +1,74 @@
+[
+    {
+        "sku": "ELC-1001",
+        "warehouse": "North DC",
+        "region": "North",
+        "on_hand": 112,
+        "reorder_point": 323,
+        "reorder_qty": 564,
+        "shortage": 211
+    },
+    {
+        "sku": "ELC-1003",
+        "warehouse": "North DC",
+        "region": "North",
+        "on_hand": 183,
+        "reorder_point": 572,
+        "reorder_qty": 1332,
+        "shortage": 389
+    },
+    {
+        "sku": "ELC-1005",
+        "warehouse": "North DC",
+        "region": "North",
+        "on_hand": 53,
+        "reorder_point": 109,
+        "reorder_qty": 175,
+        "shortage": 56
+    },
+    {
+        "sku": "ELC-1009",
+        "warehouse": "North DC",
+        "region": "North",
+        "on_hand": 16,
+        "reorder_point": 59,
+        "reorder_qty": 175,
+        "shortage": 43
+    },
+    {
+        "sku": "FSH-2003",
+        "warehouse": "North DC",
+        "region": "North",
+        "on_hand": 121,
+        "reorder_point": 311,
+        "reorder_qty": 931,
+        "shortage": 190
+    },
+    {
+        "sku": "FSH-2012",
+        "warehouse": "South DC",
+        "region": "South",
+        "on_hand": 32,
+        "reorder_point": 82,
+        "reorder_qty": 113,
+        "shortage": 50
+    },
+    {
+        "sku": "HOM-3004",
+        "warehouse": "North DC",
+        "region": "North",
+        "on_hand": 288,
+        "reorder_point": 698,
+        "reorder_qty": 1219,
+        "shortage": 410
+    },
+    {
+        "sku": "HOM-3011",
+        "warehouse": "North DC",
+        "region": "North",
+        "on_hand": 19,
+        "reorder_point": 71,
+        "reorder_qty": 165,
+        "shortage": 52
+    }
+]

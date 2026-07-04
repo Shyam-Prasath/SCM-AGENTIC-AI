@@ -1,0 +1,852 @@
+
+
+================================================================================
+RUN STARTED: 2026-07-04 16:30:02.253571
+QUERY: Create a purchase order for all low-stock products
+================================================================================
+[36m╭─[0m[36m───────────────────────[0m[36m 🚀 Crew Execution Started [0m[36m────────────────────────[0m[36m─╮[0m
+[36m│[0m                                                                            [36m│[0m
+[36m│[0m  [1;36mCrew Execution Started[0m                                                    [36m│[0m
+[36m│[0m  [37mName: [0m[36mcrew[0m                                                                [36m│[0m
+[36m│[0m  [37mID: [0m[36mb16b123f-1be2-4379-93ce-82a5e906ca51[0m                                  [36m│[0m
+[36m│[0m                                                                            [36m│[0m
+[36m│[0m                                                                            [36m│[0m
+[36m╰────────────────────────────────────────────────────────────────────────────╯[0m
+
+[33m╭─[0m[33m────────────────────────────[0m[33m 📋 Task Started [0m[33m─────────────────────────────[0m[33m─╮[0m
+[33m│[0m                                                                            [33m│[0m
+[33m│[0m  [1;33mTask Started[0m                                                              [33m│[0m
+[33m│[0m  [37mName: [0m                                                                    [33m│[0m
+[33m│[0m                                                                            [33m│[0m
+[33m│[0m  [33mYou are an intelligent Procurement & Supplier Management Agent for [0m       [33m│[0m
+[33m│[0m  [33mHexaShop.[0m                                                                 [33m│[0m
+[33m│[0m                                                                            [33m│[0m
+[33m│[0m  [33mResponsibilities:[0m                                                         [33m│[0m
+[33m│[0m  [33m1. Receive procurement requests from inventory and forecasting agents.[0m    [33m│[0m
+[33m│[0m  [33m2. Analyze SKU and required reorder quantity.[0m                             [33m│[0m
+[33m│[0m  [33m3. Identify eligible suppliers capable of fulfilling the request.[0m         [33m│[0m
+[33m│[0m  [33m4. Compare suppliers using unit cost, available quantity, lead time, [0m     [33m│[0m
+[33m│[0m  [33mreliability score, and on-time delivery rate.[0m                             [33m│[0m
+[33m│[0m  [33m5. Select the best supplier based on overall business value.[0m              [33m│[0m
+[33m│[0m  [33m6. Calculate total procurement cost.[0m                                      [33m│[0m
+[33m│[0m  [33m7. Determine whether managerial approval is required.[0m                     [33m│[0m
+[33m│[0m  [33m8. Generate a structured Purchase Order.[0m                                  [33m│[0m
+[33m│[0m  [33m9. Return the final procurement decision.[0m                                 [33m│[0m
+[33m│[0m                                                                            [33m│[0m
+[33m│[0m  [33mRules:[0m                                                                    [33m│[0m
+[33m│[0m  [33m- Never select a supplier that cannot fulfill the requested quantity.[0m     [33m│[0m
+[33m│[0m  [33m- Prefer lower unit cost, higher reliability, better on-time rate, and [0m   [33m│[0m
+[33m│[0m  [33mshorter lead time.[0m                                                        [33m│[0m
+[33m│[0m  [33m- Never invent supplier information.[0m                                      [33m│[0m
+[33m│[0m  [33m- Use only available tool outputs.[0m                                        [33m│[0m
+[33m│[0m  [33m- If PO value is within the approval threshold, approve automatically.[0m    [33m│[0m
+[33m│[0m  [33m- If PO value exceeds the threshold, mark it as PENDING_HUMAN_APPROVAL.[0m   [33m│[0m
+[33m│[0m                                                                            [33m│[0m
+[33m│[0m  [33mOutput format:[0m                                                            [33m│[0m
+[33m│[0m  [33m- Purchase Order ID[0m                                                       [33m│[0m
+[33m│[0m  [33m- SKU[0m                                                                     [33m│[0m
+[33m│[0m  [33m- Supplier ID[0m                                                             [33m│[0m
+[33m│[0m  [33m- Supplier Name[0m                                                           [33m│[0m
+[33m│[0m  [33m- Quantity[0m                                                                [33m│[0m
+[33m│[0m  [33m- Unit Cost[0m                                                               [33m│[0m
+[33m│[0m  [33m- Total Cost[0m                                                              [33m│[0m
+[33m│[0m  [33m- Lead Time[0m                                                               [33m│[0m
+[33m│[0m  [33m- Approval Status[0m                                                         [33m│[0m
+[33m│[0m  [33m- Approval Reason if any[0m                                                  [33m│[0m
+[33m│[0m                                                                            [33m│[0m
+[33m│[0m                                                                            [33m│[0m
+[33m│[0m  [33mManager question:[0m                                                         [33m│[0m
+[33m│[0m  [33mCreate a purchase order for all low-stock products[0m                        [33m│[0m
+[33m│[0m                                                                            [33m│[0m
+[33m│[0m  [33mInventory Data:[0m                                                           [33m│[0m
+[33m│[0m  [33m[[0m                                                                         [33m│[0m
+[33m│[0m  [33m    {[0m                                                                     [33m│[0m
+[33m│[0m  [33m        "sku": "ELC-1001",[0m                                                [33m│[0m
+[33m│[0m  [33m        "warehouse": "North DC",[0m                                          [33m│[0m
+[33m│[0m  [33m        "region": "North",[0m                                                [33m│[0m
+[33m│[0m  [33m        "on_hand": 112,[0m                                                   [33m│[0m
+[33m│[0m  [33m        "reorder_point": 323,[0m                                             [33m│[0m
+[33m│[0m  [33m        "reorder_qty": 564,[0m                                               [33m│[0m
+[33m│[0m  [33m        "shortage": 211[0m                                                   [33m│[0m
+[33m│[0m  [33m    },[0m                                                                    [33m│[0m
+[33m│[0m  [33m    {[0m                                                                     [33m│[0m
+[33m│[0m  [33m        "sku": "ELC-1003",[0m                                                [33m│[0m
+[33m│[0m  [33m        "warehouse": "North DC",[0m                                          [33m│[0m
+[33m│[0m  [33m        "region": "North",[0m                                                [33m│[0m
+[33m│[0m  [33m        "on_hand": 183,[0m                                                   [33m│[0m
+[33m│[0m  [33m        "reorder_point": 572,[0m                                             [33m│[0m
+[33m│[0m  [33m        "reorder_qty": 1332,[0m                                              [33m│[0m
+[33m│[0m  [33m        "shortage": 389[0m                                                   [33m│[0m
+[33m│[0m  [33m    },[0m                                                                    [33m│[0m
+[33m│[0m  [33m    {[0m                                                                     [33m│[0m
+[33m│[0m  [33m        "sku": "ELC-1005",[0m                                                [33m│[0m
+[33m│[0m  [33m        "warehouse": "North DC",[0m                                          [33m│[0m
+[33m│[0m  [33m        "region": "North",[0m                                                [33m│[0m
+[33m│[0m  [33m        "on_hand": 53,[0m                                                    [33m│[0m
+[33m│[0m  [33m        "reorder_point": 109,[0m                                             [33m│[0m
+[33m│[0m  [33m        "reorder_qty": 175,[0m                                               [33m│[0m
+[33m│[0m  [33m        "shortage": 56[0m                                                    [33m│[0m
+[33m│[0m  [33m    },[0m                                                                    [33m│[0m
+[33m│[0m  [33m    {[0m                                                                     [33m│[0m
+[33m│[0m  [33m        "sku": "ELC-1009",[0m                                                [33m│[0m
+[33m│[0m  [33m        "warehouse": "North DC",[0m                                          [33m│[0m
+[33m│[0m  [33m        "region": "North",[0m                                                [33m│[0m
+[33m│[0m  [33m        "on_hand": 16,[0m                                                    [33m│[0m
+[33m│[0m  [33m        "reorder_point": 59,[0m                                              [33m│[0m
+[33m│[0m  [33m        "reorder_qty": 175,[0m                                               [33m│[0m
+[33m│[0m  [33m        "shortage": 43[0m                                                    [33m│[0m
+[33m│[0m  [33m    },[0m                                                                    [33m│[0m
+[33m│[0m  [33m    {[0m                                                                     [33m│[0m
+[33m│[0m  [33m        "sku": "FSH-2003",[0m                                                [33m│[0m
+[33m│[0m  [33m        "warehouse": "North DC",[0m                                          [33m│[0m
+[33m│[0m  [33m        "region": "North",[0m                                                [33m│[0m
+[33m│[0m  [33m        "on_hand": 121,[0m                                                   [33m│[0m
+[33m│[0m  [33m        "reorder_point": 311,[0m                                             [33m│[0m
+[33m│[0m  [33m        "reorder_qty": 931,[0m                                               [33m│[0m
+[33m│[0m  [33m        "shortage": 190[0m                                                   [33m│[0m
+[33m│[0m  [33m    },[0m                                                                    [33m│[0m
+[33m│[0m  [33m    {[0m                                                                     [33m│[0m
+[33m│[0m  [33m        "sku": "FSH-2012",[0m                                                [33m│[0m
+[33m│[0m  [33m        "warehouse": "South DC",[0m                                          [33m│[0m
+[33m│[0m  [33m        "region": "South",[0m                                                [33m│[0m
+[33m│[0m  [33m        "on_hand": 32,[0m                                                    [33m│[0m
+[33m│[0m  [33m        "reorder_point": 82,[0m                                              [33m│[0m
+[33m│[0m  [33m        "reorder_qty": 113,[0m                                               [33m│[0m
+[33m│[0m  [33m        "shortage": 50[0m                                                    [33m│[0m
+[33m│[0m  [33m    },[0m                                                                    [33m│[0m
+[33m│[0m  [33m    {[0m                                                                     [33m│[0m
+[33m│[0m  [33m        "sku": "HOM-3004",[0m                                                [33m│[0m
+[33m│[0m  [33m        "warehouse": "North DC",[0m                                          [33m│[0m
+[33m│[0m  [33m        "region": "North",[0m                                                [33m│[0m
+[33m│[0m  [33m        "on_hand": 288,[0m                                                   [33m│[0m
+[33m│[0m  [33m        "reorder_point": 698,[0m                                             [33m│[0m
+[33m│[0m  [33m        "reorder_qty": 1219,[0m                                              [33m│[0m
+[33m│[0m  [33m        "shortage": 410[0m                                                   [33m│[0m
+[33m│[0m  [33m    },[0m                                                                    [33m│[0m
+[33m│[0m  [33m    {[0m                                                                     [33m│[0m
+[33m│[0m  [33m        "sku": "HOM-3011",[0m                                                [33m│[0m
+[33m│[0m  [33m        "warehouse": "North DC",[0m                                          [33m│[0m
+[33m│[0m  [33m        "region": "North",[0m                                                [33m│[0m
+[33m│[0m  [33m        "on_hand": 19,[0m                                                    [33m│[0m
+[33m│[0m  [33m        "reorder_point": 71,[0m                                              [33m│[0m
+[33m│[0m  [33m        "reorder_qty": 165,[0m                                               [33m│[0m
+[33m│[0m  [33m        "shortage": 52[0m                                                    [33m│[0m
+[33m│[0m  [33m    }[0m                                                                     [33m│[0m
+[33m│[0m  [33m][0m                                                                         [33m│[0m
+[33m│[0m                                                                            [33m│[0m
+[33m│[0m  [33mUse available tools to:[0m                                                   [33m│[0m
+[33m│[0m  [33m1. Identify the best supplier.[0m                                            [33m│[0m
+[33m│[0m  [33m2. Calculate procurement cost.[0m                                            [33m│[0m
+[33m│[0m  [33m3. Generate Purchase Order.[0m                                               [33m│[0m
+[33m│[0m  [33m4. Perform Human-in-the-Loop approval check.[0m                              [33m│[0m
+[33m│[0m  [33m5. Return the final Purchase Order.[0m                                       [33m│[0m
+[33m│[0m                                                                            [33m│[0m
+[33m│[0m  [37mID: [0m[33m3a0fa70e-6a9d-4d5d-8b46-66089a6c8810[0m                                  [33m│[0m
+[33m│[0m                                                                            [33m│[0m
+[33m│[0m                                                                            [33m│[0m
+[33m╰────────────────────────────────────────────────────────────────────────────╯[0m
+
+[35m╭─[0m[35m────────────────────────────[0m[35m 🤖 Agent Started [0m[35m────────────────────────────[0m[35m─╮[0m
+[35m│[0m                                                                            [35m│[0m
+[35m│[0m  [37mAgent: [0m[1;92mSenior Procurement & Supplier Management Specialist[0m                [35m│[0m
+[35m│[0m                                                                            [35m│[0m
+[35m│[0m  [37mTask: [0m                                                                    [35m│[0m
+[35m│[0m                                                                            [35m│[0m
+[35m│[0m  [92mYou are an intelligent Procurement & Supplier Management Agent for [0m       [35m│[0m
+[35m│[0m  [92mHexaShop.[0m                                                                 [35m│[0m
+[35m│[0m                                                                            [35m│[0m
+[35m│[0m  [92mResponsibilities:[0m                                                         [35m│[0m
+[35m│[0m  [92m1. Receive procurement requests from inventory and forecasting agents.[0m    [35m│[0m
+[35m│[0m  [92m2. Analyze SKU and required reorder quantity.[0m                             [35m│[0m
+[35m│[0m  [92m3. Identify eligible suppliers capable of fulfilling the request.[0m         [35m│[0m
+[35m│[0m  [92m4. Compare suppliers using unit cost, available quantity, lead time, [0m     [35m│[0m
+[35m│[0m  [92mreliability score, and on-time delivery rate.[0m                             [35m│[0m
+[35m│[0m  [92m5. Select the best supplier based on overall business value.[0m              [35m│[0m
+[35m│[0m  [92m6. Calculate total procurement cost.[0m                                      [35m│[0m
+[35m│[0m  [92m7. Determine whether managerial approval is required.[0m                     [35m│[0m
+[35m│[0m  [92m8. Generate a structured Purchase Order.[0m                                  [35m│[0m
+[35m│[0m  [92m9. Return the final procurement decision.[0m                                 [35m│[0m
+[35m│[0m                                                                            [35m│[0m
+[35m│[0m  [92mRules:[0m                                                                    [35m│[0m
+[35m│[0m  [92m- Never select a supplier that cannot fulfill the requested quantity.[0m     [35m│[0m
+[35m│[0m  [92m- Prefer lower unit cost, higher reliability, better on-time rate, and [0m   [35m│[0m
+[35m│[0m  [92mshorter lead time.[0m                                                        [35m│[0m
+[35m│[0m  [92m- Never invent supplier information.[0m                                      [35m│[0m
+[35m│[0m  [92m- Use only available tool outputs.[0m                                        [35m│[0m
+[35m│[0m  [92m- If PO value is within the approval threshold, approve automatically.[0m    [35m│[0m
+[35m│[0m  [92m- If PO value exceeds the threshold, mark it as PENDING_HUMAN_APPROVAL.[0m   [35m│[0m
+[35m│[0m                                                                            [35m│[0m
+[35m│[0m  [92mOutput format:[0m                                                            [35m│[0m
+[35m│[0m  [92m- Purchase Order ID[0m                                                       [35m│[0m
+[35m│[0m  [92m- SKU[0m                                                                     [35m│[0m
+[35m│[0m  [92m- Supplier ID[0m                                                             [35m│[0m
+[35m│[0m  [92m- Supplier Name[0m                                                           [35m│[0m
+[35m│[0m  [92m- Quantity[0m                                                                [35m│[0m
+[35m│[0m  [92m- Unit Cost[0m                                                               [35m│[0m
+[35m│[0m  [92m- Total Cost[0m                                                              [35m│[0m
+[35m│[0m  [92m- Lead Time[0m                                                               [35m│[0m
+[35m│[0m  [92m- Approval Status[0m                                                         [35m│[0m
+[35m│[0m  [92m- Approval Reason if any[0m                                                  [35m│[0m
+[35m│[0m                                                                            [35m│[0m
+[35m│[0m                                                                            [35m│[0m
+[35m│[0m  [92mManager question:[0m                                                         [35m│[0m
+[35m│[0m  [92mCreate a purchase order for all low-stock products[0m                        [35m│[0m
+[35m│[0m                                                                            [35m│[0m
+[35m│[0m  [92mInventory Data:[0m                                                           [35m│[0m
+[35m│[0m  [92m[[0m                                                                         [35m│[0m
+[35m│[0m  [92m    {[0m                                                                     [35m│[0m
+[35m│[0m  [92m        "sku": "ELC-1001",[0m                                                [35m│[0m
+[35m│[0m  [92m        "warehouse": "North DC",[0m                                          [35m│[0m
+[35m│[0m  [92m        "region": "North",[0m                                                [35m│[0m
+[35m│[0m  [92m        "on_hand": 112,[0m                                                   [35m│[0m
+[35m│[0m  [92m        "reorder_point": 323,[0m                                             [35m│[0m
+[35m│[0m  [92m        "reorder_qty": 564,[0m                                               [35m│[0m
+[35m│[0m  [92m        "shortage": 211[0m                                                   [35m│[0m
+[35m│[0m  [92m    },[0m                                                                    [35m│[0m
+[35m│[0m  [92m    {[0m                                                                     [35m│[0m
+[35m│[0m  [92m        "sku": "ELC-1003",[0m                                                [35m│[0m
+[35m│[0m  [92m        "warehouse": "North DC",[0m                                          [35m│[0m
+[35m│[0m  [92m        "region": "North",[0m                                                [35m│[0m
+[35m│[0m  [92m        "on_hand": 183,[0m                                                   [35m│[0m
+[35m│[0m  [92m        "reorder_point": 572,[0m                                             [35m│[0m
+[35m│[0m  [92m        "reorder_qty": 1332,[0m                                              [35m│[0m
+[35m│[0m  [92m        "shortage": 389[0m                                                   [35m│[0m
+[35m│[0m  [92m    },[0m                                                                    [35m│[0m
+[35m│[0m  [92m    {[0m                                                                     [35m│[0m
+[35m│[0m  [92m        "sku": "ELC-1005",[0m                                                [35m│[0m
+[35m│[0m  [92m        "warehouse": "North DC",[0m                                          [35m│[0m
+[35m│[0m  [92m        "region": "North",[0m                                                [35m│[0m
+[35m│[0m  [92m        "on_hand": 53,[0m                                                    [35m│[0m
+[35m│[0m  [92m        "reorder_point": 109,[0m                                             [35m│[0m
+[35m│[0m  [92m        "reorder_qty": 175,[0m                                               [35m│[0m
+[35m│[0m  [92m        "shortage": 56[0m                                                    [35m│[0m
+[35m│[0m  [92m    },[0m                                                                    [35m│[0m
+[35m│[0m  [92m    {[0m                                                                     [35m│[0m
+[35m│[0m  [92m        "sku": "ELC-1009",[0m                                                [35m│[0m
+[35m│[0m  [92m        "warehouse": "North DC",[0m                                          [35m│[0m
+[35m│[0m  [92m        "region": "North",[0m                                                [35m│[0m
+[35m│[0m  [92m        "on_hand": 16,[0m                                                    [35m│[0m
+[35m│[0m  [92m        "reorder_point": 59,[0m                                              [35m│[0m
+[35m│[0m  [92m        "reorder_qty": 175,[0m                                               [35m│[0m
+[35m│[0m  [92m        "shortage": 43[0m                                                    [35m│[0m
+[35m│[0m  [92m    },[0m                                                                    [35m│[0m
+[35m│[0m  [92m    {[0m                                                                     [35m│[0m
+[35m│[0m  [92m        "sku": "FSH-2003",[0m                                                [35m│[0m
+[35m│[0m  [92m        "warehouse": "North DC",[0m                                          [35m│[0m
+[35m│[0m  [92m        "region": "North",[0m                                                [35m│[0m
+[35m│[0m  [92m        "on_hand": 121,[0m                                                   [35m│[0m
+[35m│[0m  [92m        "reorder_point": 311,[0m                                             [35m│[0m
+[35m│[0m  [92m        "reorder_qty": 931,[0m                                               [35m│[0m
+[35m│[0m  [92m        "shortage": 190[0m                                                   [35m│[0m
+[35m│[0m  [92m    },[0m                                                                    [35m│[0m
+[35m│[0m  [92m    {[0m                                                                     [35m│[0m
+[35m│[0m  [92m        "sku": "FSH-2012",[0m                                                [35m│[0m
+[35m│[0m  [92m        "warehouse": "South DC",[0m                                          [35m│[0m
+[35m│[0m  [92m        "region": "South",[0m                                                [35m│[0m
+[35m│[0m  [92m        "on_hand": 32,[0m                                                    [35m│[0m
+[35m│[0m  [92m        "reorder_point": 82,[0m                                              [35m│[0m
+[35m│[0m  [92m        "reorder_qty": 113,[0m                                               [35m│[0m
+[35m│[0m  [92m        "shortage": 50[0m                                                    [35m│[0m
+[35m│[0m  [92m    },[0m                                                                    [35m│[0m
+[35m│[0m  [92m    {[0m                                                                     [35m│[0m
+[35m│[0m  [92m        "sku": "HOM-3004",[0m                                                [35m│[0m
+[35m│[0m  [92m        "warehouse": "North DC",[0m                                          [35m│[0m
+[35m│[0m  [92m        "region": "North",[0m                                                [35m│[0m
+[35m│[0m  [92m        "on_hand": 288,[0m                                                   [35m│[0m
+[35m│[0m  [92m        "reorder_point": 698,[0m                                             [35m│[0m
+[35m│[0m  [92m        "reorder_qty": 1219,[0m                                              [35m│[0m
+[35m│[0m  [92m        "shortage": 410[0m                                                   [35m│[0m
+[35m│[0m  [92m    },[0m                                                                    [35m│[0m
+[35m│[0m  [92m    {[0m                                                                     [35m│[0m
+[35m│[0m  [92m        "sku": "HOM-3011",[0m                                                [35m│[0m
+[35m│[0m  [92m        "warehouse": "North DC",[0m                                          [35m│[0m
+[35m│[0m  [92m        "region": "North",[0m                                                [35m│[0m
+[35m│[0m  [92m        "on_hand": 19,[0m                                                    [35m│[0m
+[35m│[0m  [92m        "reorder_point": 71,[0m                                              [35m│[0m
+[35m│[0m  [92m        "reorder_qty": 165,[0m                                               [35m│[0m
+[35m│[0m  [92m        "shortage": 52[0m                                                    [35m│[0m
+[35m│[0m  [92m    }[0m                                                                     [35m│[0m
+[35m│[0m  [92m][0m                                                                         [35m│[0m
+[35m│[0m                                                                            [35m│[0m
+[35m│[0m  [92mUse available tools to:[0m                                                   [35m│[0m
+[35m│[0m  [92m1. Identify the best supplier.[0m                                            [35m│[0m
+[35m│[0m  [92m2. Calculate procurement cost.[0m                                            [35m│[0m
+[35m│[0m  [92m3. Generate Purchase Order.[0m                                               [35m│[0m
+[35m│[0m  [92m4. Perform Human-in-the-Loop approval check.[0m                              [35m│[0m
+[35m│[0m  [92m5. Return the final Purchase Order.[0m                                       [35m│[0m
+[35m│[0m                                                                            [35m│[0m
+[35m│[0m                                                                            [35m│[0m
+[35m╰────────────────────────────────────────────────────────────────────────────╯[0m
+
+[33m╭─[0m[33m─────────────────────[0m[33m 🔧 Tool Execution Started (#1) [0m[33m─────────────────────[0m[33m─╮[0m
+[33m│[0m                                                                            [33m│[0m
+[33m│[0m  [37mTool: [0m[1;33msupplier_tool[0m                                                       [33m│[0m
+[33m│[0m  [37mArgs: [0m[33m{'sku': 'ELC-1001', 'quantity': 564}[0m                                [33m│[0m
+[33m│[0m                                                                            [33m│[0m
+[33m│[0m                                                                            [33m│[0m
+[33m╰────────────────────────────────────────────────────────────────────────────╯[0m
+
+[33m╭─[0m[33m─────────────────────[0m[33m 🔧 Tool Execution Started (#2) [0m[33m─────────────────────[0m[33m─╮[0m
+[33m│[0m                                                                            [33m│[0m
+[33m│[0m  [37mTool: [0m[1;33msupplier_tool[0m                                                       [33m│[0m
+[33m│[0m  [37mArgs: [0m[33m{'sku': 'ELC-1003', 'quantity': 1332}[0m                               [33m│[0m
+[33m│[0m                                                                            [33m│[0m
+[33m│[0m                                                                            [33m│[0m
+[33m╰────────────────────────────────────────────────────────────────────────────╯[0m
+
+[33m╭─[0m[33m─────────────────────[0m[33m 🔧 Tool Execution Started (#3) [0m[33m─────────────────────[0m[33m─╮[0m
+[33m│[0m                                                                            [33m│[0m
+[33m│[0m  [37mTool: [0m[1;33msupplier_tool[0m                                                       [33m│[0m
+[33m│[0m  [37mArgs: [0m[33m{'sku': 'ELC-1005', 'quantity': 175}[0m                                [33m│[0m
+[33m│[0m                                                                            [33m│[0m
+[33m│[0m                                                                            [33m│[0m
+[33m╰────────────────────────────────────────────────────────────────────────────╯[0m
+
+[33m╭─[0m[33m─────────────────────[0m[33m 🔧 Tool Execution Started (#4) [0m[33m─────────────────────[0m[33m─╮[0m
+[33m│[0m                                                                            [33m│[0m
+[33m│[0m  [37mTool: [0m[1;33msupplier_tool[0m                                                       [33m│[0m
+[33m│[0m  [37mArgs: [0m[33m{'sku': 'ELC-1009', 'quantity': 175}[0m                                [33m│[0m
+[33m│[0m                                                                            [33m│[0m
+[33m│[0m                                                                            [33m│[0m
+[33m╰────────────────────────────────────────────────────────────────────────────╯[0m
+
+[33m╭─[0m[33m─────────────────────[0m[33m 🔧 Tool Execution Started (#5) [0m[33m─────────────────────[0m[33m─╮[0m
+[33m│[0m                                                                            [33m│[0m
+[33m│[0m  [37mTool: [0m[1;33msupplier_tool[0m                                                       [33m│[0m
+[33m│[0m  [37mArgs: [0m[33m{'sku': 'FSH-2003', 'quantity': 931}[0m                                [33m│[0m
+[33m│[0m                                                                            [33m│[0m
+[33m│[0m                                                                            [33m│[0m
+[33m╰────────────────────────────────────────────────────────────────────────────╯[0m
+
+[33m╭─[0m[33m─────────────────────[0m[33m 🔧 Tool Execution Started (#6) [0m[33m─────────────────────[0m[33m─╮[0m
+[33m│[0m                                                                            [33m│[0m
+[33m│[0m  [37mTool: [0m[1;33msupplier_tool[0m                                                       [33m│[0m
+[33m│[0m  [37mArgs: [0m[33m{'sku': 'FSH-2012', 'quantity': 113}[0m                                [33m│[0m
+[33m│[0m                                                                            [33m│[0m
+[33m│[0m                                                                            [33m│[0m
+[33m╰────────────────────────────────────────────────────────────────────────────╯[0m
+[33m╭─[0m[33m─────────────────────[0m[33m 🔧 Tool Execution Started (#7) [0m[33m─────────────────────[0m[33m─╮[0m
+[33m│[0m                                                                            [33m│[0m
+[33m│[0m  [37mTool: [0m[1;33msupplier_tool[0m                                                       [33m│[0m
+[33m│[0m  [37mArgs: [0m[33m{'sku': 'HOM-3004', 'quantity': 1219}[0m                               [33m│[0m
+[33m│[0m                                                                            [33m│[0m
+[33m│[0m                                                                            [33m│[0m
+[33m╰────────────────────────────────────────────────────────────────────────────╯[0m
+[33m╭─[0m[33m─────────────────────[0m[33m 🔧 Tool Execution Started (#8) [0m[33m─────────────────────[0m[33m─╮[0m
+[33m│[0m                                                                            [33m│[0m
+[33m│[0m  [37mTool: [0m[1;33msupplier_tool[0m                                                       [33m│[0m
+[33m│[0m  [37mArgs: [0m[33m{'sku': 'HOM-3011', 'quantity': 165}[0m                                [33m│[0m
+[33m│[0m                                                                            [33m│[0m
+[33m│[0m                                                                            [33m│[0m
+[33m╰────────────────────────────────────────────────────────────────────────────╯[0m
+
+
+[32m╭─[0m[32m────────────────────[0m[32m ✅ Tool Execution Completed (#8) [0m[32m────────────────────[0m[32m─╮[0m
+[32m│[0m                                                                            [32m│[0m
+[32m│[0m  [1;32mTool Completed[0m                                                            [32m│[0m
+[32m│[0m  [37mTool: [0m[1;32msupplier_tool[0m                                                       [32m│[0m
+[32m│[0m  [37mOutput: [0m[32m{'status': 'FAILED', 'message': 'No supplier found with [0m          [32m│[0m
+[32m│[0m  [32msufficient stock.', 'sku': 'ELC-1003', 'quantity': 1332}[0m                  [32m│[0m
+[32m│[0m                                                                            [32m│[0m
+[32m│[0m                                                                            [32m│[0m
+[32m╰────────────────────────────────────────────────────────────────────────────╯[0m
+
+
+[32m╭─[0m[32m────────────────────[0m[32m ✅ Tool Execution Completed (#8) [0m[32m────────────────────[0m[32m─╮[0m
+[32m│[0m                                                                            [32m│[0m
+[32m│[0m  [1;32mTool Completed[0m                                                            [32m│[0m
+[32m│[0m  [37mTool: [0m[1;32msupplier_tool[0m                                                       [32m│[0m
+[32m│[0m  [37mOutput: [0m[32m{'status': 'FAILED', 'message': 'No supplier found with [0m          [32m│[0m
+[32m│[0m  [32msufficient stock.', 'sku': 'FSH-2003', 'quantity': 931}[0m                   [32m│[0m
+[32m│[0m                                                                            [32m│[0m
+[32m│[0m                                                                            [32m│[0m
+[32m╰────────────────────────────────────────────────────────────────────────────╯[0m
+[32m╭─[0m[32m────────────────────[0m[32m ✅ Tool Execution Completed (#8) [0m[32m────────────────────[0m[32m─╮[0m
+[32m│[0m                                                                            [32m│[0m
+[32m│[0m  [1;32mTool Completed[0m                                                            [32m│[0m
+[32m│[0m  [37mTool: [0m[1;32msupplier_tool[0m                                                       [32m│[0m
+[32m│[0m  [37mOutput: [0m[32m{'status': 'FAILED', 'message': 'No supplier found with [0m          [32m│[0m
+[32m│[0m  [32msufficient stock.', 'sku': 'ELC-1005', 'quantity': 175}[0m                   [32m│[0m
+[32m│[0m                                                                            [32m│[0m
+[32m│[0m                                                                            [32m│[0m
+[32m╰────────────────────────────────────────────────────────────────────────────╯[0m
+
+
+[32m╭─[0m[32m────────────────────[0m[32m ✅ Tool Execution Completed (#8) [0m[32m────────────────────[0m[32m─╮[0m
+[32m│[0m                                                                            [32m│[0m
+[32m│[0m  [1;32mTool Completed[0m                                                            [32m│[0m
+[32m│[0m  [37mTool: [0m[1;32msupplier_tool[0m                                                       [32m│[0m
+[32m│[0m  [37mOutput: [0m[32m{'status': 'SUCCESS', 'supplier_id': 'SUP-08', 'supplier_name': [0m  [32m│[0m
+[32m│[0m  [32m'Pacific Wholesale', 'sku': 'HOM-3004', 'unit_cost': 9.59, 'quantity': [0m   [32m│[0m
+[32m│[0m  [32m1219, 'total_cost': 11690.21, 'available_qty': 2000, [0m                     [32m│[0m
+[32m│[0m  [32m'reliability_score': 0.83, 'on_time_rate': 0.8, 'payment_terms': [0m         [32m│[0m
+[32m│[0m  [32m'Net-30', 'country': 'Malaysia', 'lead_time_days': 9}[0m                     [32m│[0m
+[32m│[0m                                                                            [32m│[0m
+[32m│[0m                                                                            [32m│[0m
+[32m╰────────────────────────────────────────────────────────────────────────────╯[0m
+
+[32m╭─[0m[32m────────────────────[0m[32m ✅ Tool Execution Completed (#8) [0m[32m────────────────────[0m[32m─╮[0m
+[32m│[0m                                                                            [32m│[0m
+[32m│[0m  [1;32mTool Completed[0m                                                            [32m│[0m
+[32m│[0m  [37mTool: [0m[1;32msupplier_tool[0m                                                       [32m│[0m
+[32m│[0m  [37mOutput: [0m[32m{'status': 'SUCCESS', 'supplier_id': 'SUP-08', 'supplier_name': [0m  [32m│[0m
+[32m│[0m  [32m'Pacific Wholesale', 'sku': 'ELC-1001', 'unit_cost': 33.17, 'quantity': [0m  [32m│[0m
+[32m│[0m  [32m564, 'total_cost': 18707.88, 'available_qty': 2000, 'reliability_score':[0m  [32m│[0m
+[32m│[0m  [32m0.83, 'on_time_rate': 0.8, 'payment_terms': 'Net-30', 'country': [0m         [32m│[0m
+[32m│[0m  [32m'Malaysia', 'lead_time_days': 9}[0m                                          [32m│[0m
+[32m│[0m                                                                            [32m│[0m
+[32m│[0m                                                                            [32m│[0m
+[32m╰────────────────────────────────────────────────────────────────────────────╯[0m
+
+[32m╭─[0m[32m────────────────────[0m[32m ✅ Tool Execution Completed (#8) [0m[32m────────────────────[0m[32m─╮[0m
+[32m│[0m                                                                            [32m│[0m
+[32m│[0m  [1;32mTool Completed[0m                                                            [32m│[0m
+[32m│[0m  [37mTool: [0m[1;32msupplier_tool[0m                                                       [32m│[0m
+[32m│[0m  [37mOutput: [0m[32m{'status': 'SUCCESS', 'supplier_id': 'SUP-04', 'supplier_name': [0m  [32m│[0m
+[32m│[0m  [32m'Bharat Textiles', 'sku': 'FSH-2012', 'unit_cost': 24.61, 'quantity': [0m    [32m│[0m
+[32m│[0m  [32m113, 'total_cost': 2780.93, 'available_qty': 300, 'reliability_score': [0m   [32m│[0m
+[32m│[0m  [32m0.9, 'on_time_rate': 0.88, 'payment_terms': 'Net-30', 'country': [0m         [32m│[0m
+[32m│[0m  [32m'India', 'lead_time_days': 15}[0m                                            [32m│[0m
+[32m│[0m                                                                            [32m│[0m
+[32m│[0m                                                                            [32m│[0m
+[32m╰────────────────────────────────────────────────────────────────────────────╯[0m
+
+[32m╭─[0m[32m────────────────────[0m[32m ✅ Tool Execution Completed (#8) [0m[32m────────────────────[0m[32m─╮[0m
+[32m│[0m                                                                            [32m│[0m
+[32m│[0m  [1;32mTool Completed[0m                                                            [32m│[0m
+[32m│[0m  [37mTool: [0m[1;32msupplier_tool[0m                                                       [32m│[0m
+[32m│[0m  [37mOutput: [0m[32m{'status': 'SUCCESS', 'supplier_id': 'SUP-02', 'supplier_name': [0m  [32m│[0m
+[32m│[0m  [32m'Shenzhen Direct', 'sku': 'ELC-1009', 'unit_cost': 73.32, 'quantity': [0m    [32m│[0m
+[32m│[0m  [32m175, 'total_cost': 12831.0, 'available_qty': 300, 'reliability_score': [0m   [32m│[0m
+[32m│[0m  [32m0.82, 'on_time_rate': 0.79, 'payment_terms': 'Net-30', 'country': [0m        [32m│[0m
+[32m│[0m  [32m'China', 'lead_time_days': 21}[0m                                            [32m│[0m
+[32m│[0m                                                                            [32m│[0m
+[32m│[0m                                                                            [32m│[0m
+[32m╰────────────────────────────────────────────────────────────────────────────╯[0m
+
+[32m╭─[0m[32m────────────────────[0m[32m ✅ Tool Execution Completed (#8) [0m[32m────────────────────[0m[32m─╮[0m
+[32m│[0m                                                                            [32m│[0m
+[32m│[0m  [1;32mTool Completed[0m                                                            [32m│[0m
+[32m│[0m  [37mTool: [0m[1;32msupplier_tool[0m                                                       [32m│[0m
+[32m│[0m  [37mOutput: [0m[32m{'status': 'SUCCESS', 'supplier_id': 'SUP-08', 'supplier_name': [0m  [32m│[0m
+[32m│[0m  [32m'Pacific Wholesale', 'sku': 'HOM-3011', 'unit_cost': 28.59, 'quantity': [0m  [32m│[0m
+[32m│[0m  [32m165, 'total_cost': 4717.35, 'available_qty': 1200, 'reliability_score': [0m  [32m│[0m
+[32m│[0m  [32m0.83, 'on_time_rate': 0.8, 'payment_terms': 'Net-30', 'country': [0m         [32m│[0m
+[32m│[0m  [32m'Malaysia', 'lead_time_days': 10}[0m                                         [32m│[0m
+[32m│[0m                                                                            [32m│[0m
+[32m│[0m                                                                            [32m│[0m
+[32m╰────────────────────────────────────────────────────────────────────────────╯[0m
+
+[32mTool supplier_tool executed with result: {'status': 'SUCCESS', 'supplier_id': 'SUP-08', 'supplier_name': 'Pacific Wholesale', 'sku': 'ELC-1001', 'unit_cost': 33.17, 'quantity': 564, 'total_cost': 18707.88, 'available_qty': 2000, 'reliability...[0m
+[32mTool supplier_tool executed with result: {'status': 'FAILED', 'message': 'No supplier found with sufficient stock.', 'sku': 'ELC-1003', 'quantity': 1332}...[0m
+[32mTool supplier_tool executed with result: {'status': 'FAILED', 'message': 'No supplier found with sufficient stock.', 'sku': 'ELC-1005', 'quantity': 175}...[0m
+[32mTool supplier_tool executed with result: {'status': 'SUCCESS', 'supplier_id': 'SUP-02', 'supplier_name': 'Shenzhen Direct', 'sku': 'ELC-1009', 'unit_cost': 73.32, 'quantity': 175, 'total_cost': 12831.0, 'available_qty': 300, 'reliability_sco...[0m
+[32mTool supplier_tool executed with result: {'status': 'FAILED', 'message': 'No supplier found with sufficient stock.', 'sku': 'FSH-2003', 'quantity': 931}...[0m
+[32mTool supplier_tool executed with result: {'status': 'SUCCESS', 'supplier_id': 'SUP-04', 'supplier_name': 'Bharat Textiles', 'sku': 'FSH-2012', 'unit_cost': 24.61, 'quantity': 113, 'total_cost': 2780.93, 'available_qty': 300, 'reliability_sco...[0m
+[32mTool supplier_tool executed with result: {'status': 'SUCCESS', 'supplier_id': 'SUP-08', 'supplier_name': 'Pacific Wholesale', 'sku': 'HOM-3004', 'unit_cost': 9.59, 'quantity': 1219, 'total_cost': 11690.21, 'available_qty': 2000, 'reliability...[0m
+[32mTool supplier_tool executed with result: {'status': 'SUCCESS', 'supplier_id': 'SUP-08', 'supplier_name': 'Pacific Wholesale', 'sku': 'HOM-3011', 'unit_cost': 28.59, 'quantity': 165, 'total_cost': 4717.35, 'available_qty': 1200, 'reliability_...[0m
+[33m╭─[0m[33m─────────────────────[0m[33m 🔧 Tool Execution Started (#1) [0m[33m─────────────────────[0m[33m─╮[0m
+[33m│[0m                                                                            [33m│[0m
+[33m│[0m  [37mTool: [0m[1;33mapproval_tool[0m                                                       [33m│[0m
+[33m│[0m  [37mArgs: [0m[33m{'purchase_order': {'purchase_order_id': 'PO-ELC-1001-564', 'sku':[0m  [33m│[0m
+[33m│[0m  [33m'ELC-1001', 'supplier_id': 'SUP-08', 'supplier_name': 'Pacific [0m           [33m│[0m
+[33m│[0m  [33mWholesale', 'quantity': 564, 'unit_cost': 33.17, 'total_cost': [0m           [33m│[0m
+[33m│[0m  [33m18707.8...[0m                                                                [33m│[0m
+[33m│[0m                                                                            [33m│[0m
+[33m│[0m                                                                            [33m│[0m
+[33m╰────────────────────────────────────────────────────────────────────────────╯[0m
+
+[33m╭─[0m[33m─────────────────────[0m[33m 🔧 Tool Execution Started (#2) [0m[33m─────────────────────[0m[33m─╮[0m
+[33m│[0m                                                                            [33m│[0m
+[33m│[0m  [37mTool: [0m[1;33mapproval_tool[0m                                                       [33m│[0m
+[33m│[0m  [37mArgs: [0m[33m{'purchase_order': {'purchase_order_id': 'PO-ELC-1009-175', 'sku':[0m  [33m│[0m
+[33m│[0m  [33m'ELC-1009', 'supplier_id': 'SUP-02', 'supplier_name': 'Shenzhen Direct',[0m  [33m│[0m
+[33m│[0m  [33m'quantity': 175, 'unit_cost': 73.32, 'total_cost': 12831.0, ...[0m           [33m│[0m
+[33m│[0m                                                                            [33m│[0m
+[33m│[0m                                                                            [33m│[0m
+[33m╰────────────────────────────────────────────────────────────────────────────╯[0m
+
+[33m╭─[0m[33m─────────────────────[0m[33m 🔧 Tool Execution Started (#3) [0m[33m─────────────────────[0m[33m─╮[0m
+[33m│[0m                                                                            [33m│[0m
+[33m│[0m  [37mTool: [0m[1;33mapproval_tool[0m                                                       [33m│[0m
+[33m│[0m  [37mArgs: [0m[33m{'purchase_order': {'purchase_order_id': 'PO-FSH-2012-113', 'sku':[0m  [33m│[0m
+[33m│[0m  [33m'FSH-2012', 'supplier_id': 'SUP-04', 'supplier_name': 'Bharat Textiles',[0m  [33m│[0m
+[33m│[0m  [33m'quantity': 113, 'unit_cost': 24.61, 'total_cost': 2780.93, ...[0m           [33m│[0m
+[33m│[0m                                                                            [33m│[0m
+[33m│[0m                                                                            [33m│[0m
+[33m╰────────────────────────────────────────────────────────────────────────────╯[0m
+
+[33m╭─[0m[33m─────────────────────[0m[33m 🔧 Tool Execution Started (#4) [0m[33m─────────────────────[0m[33m─╮[0m
+[33m│[0m                                                                            [33m│[0m
+[33m│[0m  [37mTool: [0m[1;33mapproval_tool[0m                                                       [33m│[0m
+[33m│[0m  [37mArgs: [0m[33m{'purchase_order': {'purchase_order_id': 'PO-HOM-3004-1219', [0m       [33m│[0m
+[33m│[0m  [33m'sku': 'HOM-3004', 'supplier_id': 'SUP-08', 'supplier_name': 'Pacific [0m    [33m│[0m
+[33m│[0m  [33mWholesale', 'quantity': 1219, 'unit_cost': 9.59, 'total_cost': 11690....[0m  [33m│[0m
+[33m│[0m                                                                            [33m│[0m
+[33m│[0m                                                                            [33m│[0m
+[33m╰────────────────────────────────────────────────────────────────────────────╯[0m
+[33m╭─[0m[33m─────────────────────[0m[33m 🔧 Tool Execution Started (#5) [0m[33m─────────────────────[0m[33m─╮[0m
+[33m│[0m                                                                            [33m│[0m
+[33m│[0m  [37mTool: [0m[1;33mapproval_tool[0m                                                       [33m│[0m
+[33m│[0m  [37mArgs: [0m[33m{'purchase_order': {'purchase_order_id': 'PO-HOM-3011-165', 'sku':[0m  [33m│[0m
+[33m│[0m  [33m'HOM-3011', 'supplier_id': 'SUP-08', 'supplier_name': 'Pacific [0m           [33m│[0m
+[33m│[0m  [33mWholesale', 'quantity': 165, 'unit_cost': 28.59, 'total_cost': [0m           [33m│[0m
+[33m│[0m  [33m4717.35...[0m                                                                [33m│[0m
+[33m│[0m                                                                            [33m│[0m
+[33m│[0m                                                                            [33m│[0m
+[33m╰────────────────────────────────────────────────────────────────────────────╯[0m
+[32m╭─[0m[32m────────────────────[0m[32m ✅ Tool Execution Completed (#5) [0m[32m────────────────────[0m[32m─╮[0m
+[32m│[0m                                                                            [32m│[0m
+[32m│[0m  [1;32mTool Completed[0m                                                            [32m│[0m
+[32m│[0m  [37mTool: [0m[1;32mapproval_tool[0m                                                       [32m│[0m
+[32m│[0m  [37mOutput: [0m[32m{'status': 'APPROVED', 'message': 'Purchase order approved [0m       [32m│[0m
+[32m│[0m  [32mautomatically.', 'approval_limit': 13700.0, 'purchase_order': [0m            [32m│[0m
+[32m│[0m  [32m{'purchase_order_id': 'PO-ELC-1009-175', 'sku': 'ELC-1009', [0m              [32m│[0m
+[32m│[0m  [32m'supplier_id': 'SUP-02', 'supplier_name': 'Shenzhen Direct', 'quantity':[0m  [32m│[0m
+[32m│[0m  [32m175, 'unit_cost': 73.32, 'total_cost': 12831.0, 'lead_time_days': 21, [0m    [32m│[0m
+[32m│[0m  [32m'approval_date': '2026-07-04 16:30:07', 'status': 'APPROVED'}}[0m            [32m│[0m
+[32m│[0m                                                                            [32m│[0m
+[32m│[0m                                                                            [32m│[0m
+[32m╰────────────────────────────────────────────────────────────────────────────╯[0m
+[32m╭─[0m[32m────────────────────[0m[32m ✅ Tool Execution Completed (#5) [0m[32m────────────────────[0m[32m─╮[0m
+[32m│[0m                                                                            [32m│[0m
+[32m│[0m  [1;32mTool Completed[0m                                                            [32m│[0m
+[32m│[0m  [37mTool: [0m[1;32mapproval_tool[0m                                                       [32m│[0m
+[32m│[0m  [37mOutput: [0m[32m{'status': 'APPROVED', 'message': 'Purchase order approved [0m       [32m│[0m
+[32m│[0m  [32mautomatically.', 'approval_limit': 13700.0, 'purchase_order': [0m            [32m│[0m
+[32m│[0m  [32m{'purchase_order_id': 'PO-FSH-2012-113', 'sku': 'FSH-2012', [0m              [32m│[0m
+[32m│[0m  [32m'supplier_id': 'SUP-04', 'supplier_name': 'Bharat Textiles', 'quantity':[0m  [32m│[0m
+[32m│[0m  [32m113, 'unit_cost': 24.61, 'total_cost': 2780.93, 'lead_time_days': 15, [0m    [32m│[0m
+[32m│[0m  [32m'approval_date': '2026-07-04 16:30:07', 'status': 'APPROVED'}}[0m            [32m│[0m
+[32m│[0m                                                                            [32m│[0m
+[32m│[0m                                                                            [32m│[0m
+[32m╰────────────────────────────────────────────────────────────────────────────╯[0m
+
+
+
+[32m╭─[0m[32m────────────────────[0m[32m ✅ Tool Execution Completed (#5) [0m[32m────────────────────[0m[32m─╮[0m
+[32m│[0m                                                                            [32m│[0m
+[32m│[0m  [1;32mTool Completed[0m                                                            [32m│[0m
+[32m│[0m  [37mTool: [0m[1;32mapproval_tool[0m                                                       [32m│[0m
+[32m│[0m  [37mOutput: [0m[32m{'status': 'APPROVED', 'message': 'Purchase order approved [0m       [32m│[0m
+[32m│[0m  [32mautomatically.', 'approval_limit': 13700.0, 'purchase_order': [0m            [32m│[0m
+[32m│[0m  [32m{'purchase_order_id': 'PO-HOM-3004-1219', 'sku': 'HOM-3004', [0m             [32m│[0m
+[32m│[0m  [32m'supplier_id': 'SUP-08', 'supplier_name': 'Pacific Wholesale', [0m           [32m│[0m
+[32m│[0m  [32m'quantity': 1219, 'unit_cost': 9.59, 'total_cost': 11690.21, [0m             [32m│[0m
+[32m│[0m  [32m'lead_time_days': 9, 'approval_date': '2026-07-04 16:30:07', 'status': [0m   [32m│[0m
+[32m│[0m  [32m'APPROVED'}}[0m                                                              [32m│[0m
+[32m│[0m                                                                            [32m│[0m
+[32m│[0m                                                                            [32m│[0m
+[32m╰────────────────────────────────────────────────────────────────────────────╯[0m
+[32m╭─[0m[32m────────────────────[0m[32m ✅ Tool Execution Completed (#5) [0m[32m────────────────────[0m[32m─╮[0m
+[32m│[0m                                                                            [32m│[0m
+[32m│[0m  [1;32mTool Completed[0m                                                            [32m│[0m
+[32m│[0m  [37mTool: [0m[1;32mapproval_tool[0m                                                       [32m│[0m
+[32m│[0m  [37mOutput: [0m[32m{'status': 'APPROVED', 'message': 'Purchase order approved [0m       [32m│[0m
+[32m│[0m  [32mautomatically.', 'approval_limit': 13700.0, 'purchase_order': [0m            [32m│[0m
+[32m│[0m  [32m{'purchase_order_id': 'PO-HOM-3011-165', 'sku': 'HOM-3011', [0m              [32m│[0m
+[32m│[0m  [32m'supplier_id': 'SUP-08', 'supplier_name': 'Pacific Wholesale', [0m           [32m│[0m
+[32m│[0m  [32m'quantity': 165, 'unit_cost': 28.59, 'total_cost': 4717.35, [0m              [32m│[0m
+[32m│[0m  [32m'lead_time_days': 10, 'approval_date': '2026-07-04 16:30:07', 'status': [0m  [32m│[0m
+[32m│[0m  [32m'APPROVED'}}[0m                                                              [32m│[0m
+[32m│[0m                                                                            [32m│[0m
+[32m│[0m                                                                            [32m│[0m
+[32m╰────────────────────────────────────────────────────────────────────────────╯[0m
+
+
+
+[32m╭─[0m[32m────────────────────[0m[32m ✅ Tool Execution Completed (#5) [0m[32m────────────────────[0m[32m─╮[0m
+[32m│[0m                                                                            [32m│[0m
+[32m│[0m  [1;32mTool Completed[0m                                                            [32m│[0m
+[32m│[0m  [37mTool: [0m[1;32mapproval_tool[0m                                                       [32m│[0m
+[32m│[0m  [37mOutput: [0m[32m{'status': 'PENDING_HUMAN_APPROVAL', 'message': 'Purchase order [0m  [32m│[0m
+[32m│[0m  [32mrequires manager approval.', 'approval_limit': 13700.0, [0m                  [32m│[0m
+[32m│[0m  [32m'purchase_order': {'purchase_order_id': 'PO-ELC-1001-564', 'sku': [0m        [32m│[0m
+[32m│[0m  [32m'ELC-1001', 'supplier_id': 'SUP-08', 'supplier_name': 'Pacific [0m           [32m│[0m
+[32m│[0m  [32mWholesale', 'quantity': 564, 'unit_cost': 33.17, 'total_cost': 18707.88,[0m  [32m│[0m
+[32m│[0m  [32m'lead_time_days': 9, 'approval_date': '2026-07-04 16:30:07', 'status': [0m   [32m│[0m
+[32m│[0m  [32m'PENDING_HUMAN_APPROVAL'}}[0m                                                [32m│[0m
+[32m│[0m                                                                            [32m│[0m
+[32m│[0m                                                                            [32m│[0m
+[32m╰────────────────────────────────────────────────────────────────────────────╯[0m
+
+[32mTool approval_tool executed with result: {'status': 'PENDING_HUMAN_APPROVAL', 'message': 'Purchase order requires manager approval.', 'approval_limit': 13700.0, 'purchase_order': {'purchase_order_id': 'PO-ELC-1001-564', 'sku': 'ELC-1001', 's...[0m
+[32mTool approval_tool executed with result: {'status': 'APPROVED', 'message': 'Purchase order approved automatically.', 'approval_limit': 13700.0, 'purchase_order': {'purchase_order_id': 'PO-ELC-1009-175', 'sku': 'ELC-1009', 'supplier_id': 'SUP...[0m
+[32mTool approval_tool executed with result: {'status': 'APPROVED', 'message': 'Purchase order approved automatically.', 'approval_limit': 13700.0, 'purchase_order': {'purchase_order_id': 'PO-FSH-2012-113', 'sku': 'FSH-2012', 'supplier_id': 'SUP...[0m
+[32mTool approval_tool executed with result: {'status': 'APPROVED', 'message': 'Purchase order approved automatically.', 'approval_limit': 13700.0, 'purchase_order': {'purchase_order_id': 'PO-HOM-3004-1219', 'sku': 'HOM-3004', 'supplier_id': 'SU...[0m
+[32mTool approval_tool executed with result: {'status': 'APPROVED', 'message': 'Purchase order approved automatically.', 'approval_limit': 13700.0, 'purchase_order': {'purchase_order_id': 'PO-HOM-3011-165', 'sku': 'HOM-3011', 'supplier_id': 'SUP...[0m
+[35m[Finalize] todos_count=0, todos_with_results=0[0m
+[32m╭─[0m[32m─────────────────────────[0m[32m ✅ Agent Final Answer [0m[32m──────────────────────────[0m[32m─╮[0m
+[32m│[0m                                                                            [32m│[0m
+[32m│[0m  [37mAgent: [0m[1;92mSenior Procurement & Supplier Management Specialist[0m                [32m│[0m
+[32m│[0m                                                                            [32m│[0m
+[32m│[0m  [37mFinal Answer:[0m                                                             [32m│[0m
+[32m│[0m  [92mPurchase Order ID: PO-ELC-1001-564[0m                                        [32m│[0m
+[32m│[0m  [92mSKU: ELC-1001[0m                                                             [32m│[0m
+[32m│[0m  [92mSupplier ID: SUP-08[0m                                                       [32m│[0m
+[32m│[0m  [92mSupplier Name: Pacific Wholesale[0m                                          [32m│[0m
+[32m│[0m  [92mQuantity: 564[0m                                                             [32m│[0m
+[32m│[0m  [92mUnit Cost: 33.17[0m                                                          [32m│[0m
+[32m│[0m  [92mTotal Cost: 18707.88[0m                                                      [32m│[0m
+[32m│[0m  [92mLead Time: 9 days[0m                                                         [32m│[0m
+[32m│[0m  [92mApproval Status: PENDING_HUMAN_APPROVAL[0m                                   [32m│[0m
+[32m│[0m  [92mApproval Reason: Purchase order requires manager approval because total [0m  [32m│[0m
+[32m│[0m  [92mcost exceeds the approval limit of 13700.0[0m                                [32m│[0m
+[32m│[0m                                                                            [32m│[0m
+[32m│[0m  [92mPurchase Order ID: PO-ELC-1009-175[0m                                        [32m│[0m
+[32m│[0m  [92mSKU: ELC-1009[0m                                                             [32m│[0m
+[32m│[0m  [92mSupplier ID: SUP-02[0m                                                       [32m│[0m
+[32m│[0m  [92mSupplier Name: Shenzhen Direct[0m                                            [32m│[0m
+[32m│[0m  [92mQuantity: 175[0m                                                             [32m│[0m
+[32m│[0m  [92mUnit Cost: 73.32[0m                                                          [32m│[0m
+[32m│[0m  [92mTotal Cost: 12831.00[0m                                                      [32m│[0m
+[32m│[0m  [92mLead Time: 21 days[0m                                                        [32m│[0m
+[32m│[0m  [92mApproval Status: APPROVED[0m                                                 [32m│[0m
+[32m│[0m                                                                            [32m│[0m
+[32m│[0m  [92mPurchase Order ID: PO-FSH-2012-113[0m                                        [32m│[0m
+[32m│[0m  [92mSKU: FSH-2012[0m                                                             [32m│[0m
+[32m│[0m  [92mSupplier ID: SUP-04[0m                                                       [32m│[0m
+[32m│[0m  [92mSupplier Name: Bharat Textiles[0m                                            [32m│[0m
+[32m│[0m  [92mQuantity: 113[0m                                                             [32m│[0m
+[32m│[0m  [92mUnit Cost: 24.61[0m                                                          [32m│[0m
+[32m│[0m  [92mTotal Cost: 2780.93[0m                                                       [32m│[0m
+[32m│[0m  [92mLead Time: 15 days[0m                                                        [32m│[0m
+[32m│[0m  [92mApproval Status: APPROVED[0m                                                 [32m│[0m
+[32m│[0m                                                                            [32m│[0m
+[32m│[0m  [92mPurchase Order ID: PO-HOM-3004-1219[0m                                       [32m│[0m
+[32m│[0m  [92mSKU: HOM-3004[0m                                                             [32m│[0m
+[32m│[0m  [92mSupplier ID: SUP-08[0m                                                       [32m│[0m
+[32m│[0m  [92mSupplier Name: Pacific Wholesale[0m                                          [32m│[0m
+[32m│[0m  [92mQuantity: 1219[0m                                                            [32m│[0m
+[32m│[0m  [92mUnit Cost: 9.59[0m                                                           [32m│[0m
+[32m│[0m  [92mTotal Cost: 11690.21[0m                                                      [32m│[0m
+[32m│[0m  [92mLead Time: 9 days[0m                                                         [32m│[0m
+[32m│[0m  [92mApproval Status: APPROVED[0m                                                 [32m│[0m
+[32m│[0m                                                                            [32m│[0m
+[32m│[0m  [92mPurchase Order ID: PO-HOM-3011-165[0m                                        [32m│[0m
+[32m│[0m  [92mSKU: HOM-3011[0m                                                             [32m│[0m
+[32m│[0m  [92mSupplier ID: SUP-08[0m                                                       [32m│[0m
+[32m│[0m  [92mSupplier Name: Pacific Wholesale[0m                                          [32m│[0m
+[32m│[0m  [92mQuantity: 165[0m                                                             [32m│[0m
+[32m│[0m  [92mUnit Cost: 28.59[0m                                                          [32m│[0m
+[32m│[0m  [92mTotal Cost: 4717.35[0m                                                       [32m│[0m
+[32m│[0m  [92mLead Time: 10 days[0m                                                        [32m│[0m
+[32m│[0m  [92mApproval Status: APPROVED[0m                                                 [32m│[0m
+[32m│[0m                                                                            [32m│[0m
+[32m│[0m  [92mExcluded from PO creation due to no eligible supplier with sufficient [0m    [32m│[0m
+[32m│[0m  [92mstock:[0m                                                                    [32m│[0m
+[32m│[0m  [92m- ELC-1003[0m                                                                [32m│[0m
+[32m│[0m  [92m- ELC-1005[0m                                                                [32m│[0m
+[32m│[0m  [92m- FSH-2003[0m                                                                [32m│[0m
+[32m│[0m                                                                            [32m│[0m
+[32m╰────────────────────────────────────────────────────────────────────────────╯[0m
+
+[32m╭─[0m[32m───────────────────────────[0m[32m 📋 Task Completion [0m[32m───────────────────────────[0m[32m─╮[0m
+[32m│[0m                                                                            [32m│[0m
+[32m│[0m  [1;32mTask Completed[0m                                                            [32m│[0m
+[32m│[0m  [37mName: [0m                                                                    [32m│[0m
+[32m│[0m                                                                            [32m│[0m
+[32m│[0m  [32mYou are an intelligent Procurement & Supplier Management Agent for [0m       [32m│[0m
+[32m│[0m  [32mHexaShop.[0m                                                                 [32m│[0m
+[32m│[0m                                                                            [32m│[0m
+[32m│[0m  [32mResponsibilities:[0m                                                         [32m│[0m
+[32m│[0m  [32m1. Receive procurement requests from inventory and forecasting agents.[0m    [32m│[0m
+[32m│[0m  [32m2. Analyze SKU and required reorder quantity.[0m                             [32m│[0m
+[32m│[0m  [32m3. Identify eligible suppliers capable of fulfilling the request.[0m         [32m│[0m
+[32m│[0m  [32m4. Compare suppliers using unit cost, available quantity, lead time, [0m     [32m│[0m
+[32m│[0m  [32mreliability score, and on-time delivery rate.[0m                             [32m│[0m
+[32m│[0m  [32m5. Select the best supplier based on overall business value.[0m              [32m│[0m
+[32m│[0m  [32m6. Calculate total procurement cost.[0m                                      [32m│[0m
+[32m│[0m  [32m7. Determine whether managerial approval is required.[0m                     [32m│[0m
+[32m│[0m  [32m8. Generate a structured Purchase Order.[0m                                  [32m│[0m
+[32m│[0m  [32m9. Return the final procurement decision.[0m                                 [32m│[0m
+[32m│[0m                                                                            [32m│[0m
+[32m│[0m  [32mRules:[0m                                                                    [32m│[0m
+[32m│[0m  [32m- Never select a supplier that cannot fulfill the requested quantity.[0m     [32m│[0m
+[32m│[0m  [32m- Prefer lower unit cost, higher reliability, better on-time rate, and [0m   [32m│[0m
+[32m│[0m  [32mshorter lead time.[0m                                                        [32m│[0m
+[32m│[0m  [32m- Never invent supplier information.[0m                                      [32m│[0m
+[32m│[0m  [32m- Use only available tool outputs.[0m                                        [32m│[0m
+[32m│[0m  [32m- If PO value is within the approval threshold, approve automatically.[0m    [32m│[0m
+[32m│[0m  [32m- If PO value exceeds the threshold, mark it as PENDING_HUMAN_APPROVAL.[0m   [32m│[0m
+[32m│[0m                                                                            [32m│[0m
+[32m│[0m  [32mOutput format:[0m                                                            [32m│[0m
+[32m│[0m  [32m- Purchase Order ID[0m                                                       [32m│[0m
+[32m│[0m  [32m- SKU[0m                                                                     [32m│[0m
+[32m│[0m  [32m- Supplier ID[0m                                                             [32m│[0m
+[32m│[0m  [32m- Supplier Name[0m                                                           [32m│[0m
+[32m│[0m  [32m- Quantity[0m                                                                [32m│[0m
+[32m│[0m  [32m- Unit Cost[0m                                                               [32m│[0m
+[32m│[0m  [32m- Total Cost[0m                                                              [32m│[0m
+[32m│[0m  [32m- Lead Time[0m                                                               [32m│[0m
+[32m│[0m  [32m- Approval Status[0m                                                         [32m│[0m
+[32m│[0m  [32m- Approval Reason if any[0m                                                  [32m│[0m
+[32m│[0m                                                                            [32m│[0m
+[32m│[0m                                                                            [32m│[0m
+[32m│[0m  [32mManager question:[0m                                                         [32m│[0m
+[32m│[0m  [32mCreate a purchase order for all low-stock products[0m                        [32m│[0m
+[32m│[0m                                                                            [32m│[0m
+[32m│[0m  [32mInventory Data:[0m                                                           [32m│[0m
+[32m│[0m  [32m[[0m                                                                         [32m│[0m
+[32m│[0m  [32m    {[0m                                                                     [32m│[0m
+[32m│[0m  [32m        "sku": "ELC-1001",[0m                                                [32m│[0m
+[32m│[0m  [32m        "warehouse": "North DC",[0m                                          [32m│[0m
+[32m│[0m  [32m        "region": "North",[0m                                                [32m│[0m
+[32m│[0m  [32m        "on_hand": 112,[0m                                                   [32m│[0m
+[32m│[0m  [32m        "reorder_point": 323,[0m                                             [32m│[0m
+[32m│[0m  [32m        "reorder_qty": 564,[0m                                               [32m│[0m
+[32m│[0m  [32m        "shortage": 211[0m                                                   [32m│[0m
+[32m│[0m  [32m    },[0m                                                                    [32m│[0m
+[32m│[0m  [32m    {[0m                                                                     [32m│[0m
+[32m│[0m  [32m        "sku": "ELC-1003",[0m                                                [32m│[0m
+[32m│[0m  [32m        "warehouse": "North DC",[0m                                          [32m│[0m
+[32m│[0m  [32m        "region": "North",[0m                                                [32m│[0m
+[32m│[0m  [32m        "on_hand": 183,[0m                                                   [32m│[0m
+[32m│[0m  [32m        "reorder_point": 572,[0m                                             [32m│[0m
+[32m│[0m  [32m        "reorder_qty": 1332,[0m                                              [32m│[0m
+[32m│[0m  [32m        "shortage": 389[0m                                                   [32m│[0m
+[32m│[0m  [32m    },[0m                                                                    [32m│[0m
+[32m│[0m  [32m    {[0m                                                                     [32m│[0m
+[32m│[0m  [32m        "sku": "ELC-1005",[0m                                                [32m│[0m
+[32m│[0m  [32m        "warehouse": "North DC",[0m                                          [32m│[0m
+[32m│[0m  [32m        "region": "North",[0m                                                [32m│[0m
+[32m│[0m  [32m        "on_hand": 53,[0m                                                    [32m│[0m
+[32m│[0m  [32m        "reorder_point": 109,[0m                                             [32m│[0m
+[32m│[0m  [32m        "reorder_qty": 175,[0m                                               [32m│[0m
+[32m│[0m  [32m        "shortage": 56[0m                                                    [32m│[0m
+[32m│[0m  [32m    },[0m                                                                    [32m│[0m
+[32m│[0m  [32m    {[0m                                                                     [32m│[0m
+[32m│[0m  [32m        "sku": "ELC-1009",[0m                                                [32m│[0m
+[32m│[0m  [32m        "warehouse": "North DC",[0m                                          [32m│[0m
+[32m│[0m  [32m        "region": "North",[0m                                                [32m│[0m
+[32m│[0m  [32m        "on_hand": 16,[0m                                                    [32m│[0m
+[32m│[0m  [32m        "reorder_point": 59,[0m                                              [32m│[0m
+[32m│[0m  [32m        "reorder_qty": 175,[0m                                               [32m│[0m
+[32m│[0m  [32m        "shortage": 43[0m                                                    [32m│[0m
+[32m│[0m  [32m    },[0m                                                                    [32m│[0m
+[32m│[0m  [32m    {[0m                                                                     [32m│[0m
+[32m│[0m  [32m        "sku": "FSH-2003",[0m                                                [32m│[0m
+[32m│[0m  [32m        "warehouse": "North DC",[0m                                          [32m│[0m
+[32m│[0m  [32m        "region": "North",[0m                                                [32m│[0m
+[32m│[0m  [32m        "on_hand": 121,[0m                                                   [32m│[0m
+[32m│[0m  [32m        "reorder_point": 311,[0m                                             [32m│[0m
+[32m│[0m  [32m        "reorder_qty": 931,[0m                                               [32m│[0m
+[32m│[0m  [32m        "shortage": 190[0m                                                   [32m│[0m
+[32m│[0m  [32m    },[0m                                                                    [32m│[0m
+[32m│[0m  [32m    {[0m                                                                     [32m│[0m
+[32m│[0m  [32m        "sku": "FSH-2012",[0m                                                [32m│[0m
+[32m│[0m  [32m        "warehouse": "South DC",[0m                                          [32m│[0m
+[32m│[0m  [32m        "region": "South",[0m                                                [32m│[0m
+[32m│[0m  [32m        "on_hand": 32,[0m                                                    [32m│[0m
+[32m│[0m  [32m        "reorder_point": 82,[0m                                              [32m│[0m
+[32m│[0m  [32m        "reorder_qty": 113,[0m                                               [32m│[0m
+[32m│[0m  [32m        "shortage": 50[0m                                                    [32m│[0m
+[32m│[0m  [32m    },[0m                                                                    [32m│[0m
+[32m│[0m  [32m    {[0m                                                                     [32m│[0m
+[32m│[0m  [32m        "sku": "HOM-3004",[0m                                                [32m│[0m
+[32m│[0m  [32m        "warehouse": "North DC",[0m                                          [32m│[0m
+[32m│[0m  [32m        "region": "North",[0m                                                [32m│[0m
+[32m│[0m  [32m        "on_hand": 288,[0m                                                   [32m│[0m
+[32m│[0m  [32m        "reorder_point": 698,[0m                                             [32m│[0m
+[32m│[0m  [32m        "reorder_qty": 1219,[0m                                              [32m│[0m
+[32m│[0m  [32m        "shortage": 410[0m                                                   [32m│[0m
+[32m│[0m  [32m    },[0m                                                                    [32m│[0m
+[32m│[0m  [32m    {[0m                                                                     [32m│[0m
+[32m│[0m  [32m        "sku": "HOM-3011",[0m                                                [32m│[0m
+[32m│[0m  [32m        "warehouse": "North DC",[0m                                          [32m│[0m
+[32m│[0m  [32m        "region": "North",[0m                                                [32m│[0m
+[32m│[0m  [32m        "on_hand": 19,[0m                                                    [32m│[0m
+[32m│[0m  [32m        "reorder_point": 71,[0m                                              [32m│[0m
+[32m│[0m  [32m        "reorder_qty": 165,[0m                                               [32m│[0m
+[32m│[0m  [32m        "shortage": 52[0m                                                    [32m│[0m
+[32m│[0m  [32m    }[0m                                                                     [32m│[0m
+[32m│[0m  [32m][0m                                                                         [32m│[0m
+[32m│[0m                                                                            [32m│[0m
+[32m│[0m  [32mUse available tools to:[0m                                                   [32m│[0m
+[32m│[0m  [32m1. Identify the best supplier.[0m                                            [32m│[0m
+[32m│[0m  [32m2. Calculate procurement cost.[0m                                            [32m│[0m
+[32m│[0m  [32m3. Generate Purchase Order.[0m                                               [32m│[0m
+[32m│[0m  [32m4. Perform Human-in-the-Loop approval check.[0m                              [32m│[0m
+[32m│[0m  [32m5. Return the final Purchase Order.[0m                                       [32m│[0m
+[32m│[0m                                                                            [32m│[0m
+[32m│[0m  [37mAgent: [0m[32mSenior Procurement & Supplier Management Specialist[0m                [32m│[0m
+[32m│[0m                                                                            [32m│[0m
+[32m│[0m                                                                            [32m│[0m
+[32m╰────────────────────────────────────────────────────────────────────────────╯[0m
+
+[32m╭─[0m[32m────────────────────────────[0m[32m Crew Completion [0m[32m─────────────────────────────[0m[32m─╮[0m
+[32m│[0m                                                                            [32m│[0m
+[32m│[0m  [1;32mCrew Execution Completed[0m                                                  [32m│[0m
+[32m│[0m  [37mName: [0m[32mcrew[0m                                                                [32m│[0m
+[32m│[0m  [37mID: [0m[32mb16b123f-1be2-4379-93ce-82a5e906ca51[0m                                  [32m│[0m
+[32m│[0m  [37mFinal Output: Purchase Order ID: PO-ELC-1001-564[0m                          [32m│[0m
+[32m│[0m  [37mSKU: ELC-1001[0m                                                             [32m│[0m
+[32m│[0m  [37mSupplier ID: SUP-08[0m                                                       [32m│[0m
+[32m│[0m  [37mSupplier Name: Pacific Wholesale[0m                                          [32m│[0m
+[32m│[0m  [37mQuantity: 564[0m                                                             [32m│[0m
+[32m│[0m  [37mUnit Cost: 33.17[0m                                                          [32m│[0m
+[32m│[0m  [37mTotal Cost: 18707.88[0m                                                      [32m│[0m
+[32m│[0m  [37mLead Time: 9 days[0m                                                         [32m│[0m
+[32m│[0m  [37mApproval Status: PENDING_HUMAN_APPROVAL[0m                                   [32m│[0m
+[32m│[0m  [37mApproval Reason: Purchase order requires manager approval because total [0m  [32m│[0m
+[32m│[0m  [37mcost exceeds the approval limit of 13700.0[0m                                [32m│[0m
+[32m│[0m                                                                            [32m│[0m
+[32m│[0m  [37mPurchase Order ID: PO-ELC-1009-175[0m                                        [32m│[0m
+[32m│[0m  [37mSKU: ELC-1009[0m                                                             [32m│[0m
+[32m│[0m  [37mSupplier ID: SUP-02[0m                                                       [32m│[0m
+[32m│[0m  [37mSupplier Name: Shenzhen Direct[0m                                            [32m│[0m
+[32m│[0m  [37mQuantity: 175[0m                                                             [32m│[0m
+[32m│[0m  [37mUnit Cost: 73.32[0m                                                          [32m│[0m
+[32m│[0m  [37mTotal Cost: 12831.00[0m                                                      [32m│[0m
+[32m│[0m  [37mLead Time: 21 days[0m                                                        [32m│[0m
+[32m│[0m  [37mApproval Status: APPROVED[0m                                                 [32m│[0m
+[32m│[0m                                                                            [32m│[0m
+[32m│[0m  [37mPurchase Order ID: PO-FSH-2012-113[0m                                        [32m│[0m
+[32m│[0m  [37mSKU: FSH-2012[0m                                                             [32m│[0m
+[32m│[0m  [37mSupplier ID: SUP-04[0m                                                       [32m│[0m
+[32m│[0m  [37mSupplier Name: Bharat Textiles[0m                                            [32m│[0m
+[32m│[0m  [37mQuantity: 113[0m                                                             [32m│[0m
+[32m│[0m  [37mUnit Cost: 24.61[0m                                                          [32m│[0m
+[32m│[0m  [37mTotal Cost: 2780.93[0m                                                       [32m│[0m
+[32m│[0m  [37mLead Time: 15 days[0m                                                        [32m│[0m
+[32m│[0m  [37mApproval Status: APPROVED[0m                                                 [32m│[0m
+[32m│[0m                                                                            [32m│[0m
+[32m│[0m  [37mPurchase Order ID: PO-HOM-3004-1219[0m                                       [32m│[0m
+[32m│[0m  [37mSKU: HOM-3004[0m                                                             [32m│[0m
+[32m│[0m  [37mSupplier ID: SUP-08[0m                                                       [32m│[0m
+[32m│[0m  [37mSupplier Name: Pacific Wholesale[0m                                          [32m│[0m
+[32m│[0m  [37mQuantity: 1219[0m                                                            [32m│[0m
+[32m│[0m  [37mUnit Cost: 9.59[0m                                                           [32m│[0m
+[32m│[0m  [37mTotal Cost: 11690.21[0m                                                      [32m│[0m
+[32m│[0m  [37mLead Time: 9 days[0m                                                         [32m│[0m
+[32m│[0m  [37mApproval Status: APPROVED[0m                                                 [32m│[0m
+[32m│[0m                                                                            [32m│[0m
+[32m│[0m  [37mPurchase Order ID: PO-HOM-3011-165[0m                                        [32m│[0m
+[32m│[0m  [37mSKU: HOM-3011[0m                                                             [32m│[0m
+[32m│[0m  [37mSupplier ID: SUP-08[0m                                                       [32m│[0m
+[32m│[0m  [37mSupplier Name: Pacific Wholesale[0m                                          [32m│[0m
+[32m│[0m  [37mQuantity: 165[0m                                                             [32m│[0m
+[32m│[0m  [37mUnit Cost: 28.59[0m                                                          [32m│[0m
+[32m│[0m  [37mTotal Cost: 4717.35[0m                                                       [32m│[0m
+[32m│[0m  [37mLead Time: 10 days[0m                                                        [32m│[0m
+[32m│[0m  [37mApproval Status: APPROVED[0m                                                 [32m│[0m
+[32m│[0m                                                                            [32m│[0m
+[32m│[0m  [37mExcluded from PO creation due to no eligible supplier with sufficient [0m    [32m│[0m
+[32m│[0m  [37mstock:[0m                                                                    [32m│[0m
+[32m│[0m  [37m- ELC-1003[0m                                                                [32m│[0m
+[32m│[0m  [37m- ELC-1005[0m                                                                [32m│[0m
+[32m│[0m  [37m- FSH-2003[0m                                                                [32m│[0m
+[32m│[0m                                                                            [32m│[0m
+[32m│[0m                                                                            [32m│[0m
+[32m╰────────────────────────────────────────────────────────────────────────────╯[0m
+
+[34m╭─[0m[34m─────────────────────────────[0m[34m Tracing Status [0m[34m─────────────────────────────[0m[34m─╮[0m
+[34m│[0m                                                                            [34m│[0m
+[34m│[0m  Info: Tracing is disabled.                                                [34m│[0m
+[34m│[0m                                                                            [34m│[0m
+[34m│[0m  To enable tracing, do any one of these:                                   [34m│[0m
+[34m│[0m  • Set tracing=True in your Crew/Flow code                                 [34m│[0m
+[34m│[0m  • Set CREWAI_TRACING_ENABLED=true in your project's .env file             [34m│[0m
+[34m│[0m  • Run: crewai traces enable                                               [34m│[0m
+[34m│[0m                                                                            [34m│[0m
+[34m╰────────────────────────────────────────────────────────────────────────────╯[0m
