@@ -5,10 +5,6 @@ from dotenv import load_dotenv
 from crewai import Agent, Task, Crew, LLM
 from crewai.tools import tool
 
-# ---------------------------------------------------
-# Load Environment Variables
-# ---------------------------------------------------
-
 load_dotenv()
 
 gpt_llm = LLM(
