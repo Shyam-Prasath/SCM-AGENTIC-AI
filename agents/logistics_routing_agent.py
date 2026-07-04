@@ -1,11 +1,11 @@
-
 # Logistics & Routing Agent
 
-
+import re
 import os
 import json
 from pathlib import Path
 from uuid import uuid4
+from datetime import timedelta
 
 import pandas as pd
 from dotenv import load_dotenv
@@ -45,6 +45,15 @@ if DATA_DIR is None:
 CARRIERS_FILE = DATA_DIR / "carriers.json"
 ORDERS_FILE = DATA_DIR / "orders.csv"
 PRODUCTS_FILE = DATA_DIR / "products.csv"
+
+
+# =====================================================
+# LOGISTICS RISK THRESHOLDS
+# =====================================================
+
+# These values can also be changed from .env if needed.
+MAX_SHIPMENT_WEIGHT_KG = float(os.getenv("MAX_SHIPMENT_WEIGHT_KG", "100"))
+HIGH_SHIPPING_COST_LIMIT = float(os.getenv("HIGH_SHIPPING_COST_LIMIT", "5000"))
 
 
 # =====================================================
@@ -133,19 +142,82 @@ Use the Shipping API Tool with this input:
 limit={limit}, mode={mode}
 
 Rules:
-1. Use ONLY the Shipping API Tool output for carrier, cost, ETA, and tracking details.
+1. Use ONLY the Shipping API Tool output for carrier, cost, ETA, tracking, delivery risk, and approval details.
 2. Do not invent shipping values.
 3. Compare carriers based on cost, ETA, coverage, and reliability.
 4. Mention exceptions clearly if any order cannot be planned.
-5. Return the final answer in a clear manager-friendly format.
+5. If Approval Required is True, clearly mention that manager approval is needed before confirming shipment.
+6. Return the final answer in a clear manager-friendly format.
 
 Final response should include:
 - Summary
 - Order-wise fulfilment plan
 - Total shipping cost
 - Average ETA
+- Delivery risk status
+- Approval required status
 - Key reason for selected carriers
 """
+
+
+# =====================================================
+# INPUT UNDERSTANDING HELPERS
+# =====================================================
+
+def validate_mode(mode):
+    valid_modes = ["balanced", "cheapest", "fastest"]
+
+    if not mode:
+        return "balanced"
+
+    mode = str(mode).lower().strip()
+
+    if mode not in valid_modes:
+        return "balanced"
+
+    return mode
+
+
+def detect_mode_from_question(question):
+    question = str(question).lower()
+
+    if "fastest" in question or "quickest" in question or "speed" in question:
+        return "fastest"
+
+    if "cheapest" in question or "lowest cost" in question or "low cost" in question:
+        return "cheapest"
+
+    if "balanced" in question or "optimize" in question or "optimized" in question or "best" in question:
+        return "balanced"
+
+    return None
+
+
+def detect_limit_from_question(question):
+    question = str(question).lower()
+
+    if "all" in question:
+        return None
+
+    numbers = re.findall(r"\d+", question)
+
+    if numbers:
+        limit = int(numbers[0])
+
+        if limit <= 0:
+            return 5
+
+        return limit
+
+    return None
+
+
+def parse_positive_int(value, default=5):
+    try:
+        number = int(value)
+        return number if number > 0 else default
+    except Exception:
+        return default
 
 
 # =====================================================
@@ -187,16 +259,30 @@ def get_pending_orders(limit=10):
     """
     Select only pending orders because shipped/delivered orders
     do not need fulfilment planning.
+    Orders with earlier promised dates are planned first.
     """
 
     orders = load_orders()
 
     pending_orders = orders[
-        orders["status"].str.lower() == "pending"
+        orders["status"].fillna("").str.lower() == "pending"
     ].copy()
 
-    # Orders with earlier promised dates are planned first
-    pending_orders = pending_orders.sort_values("promised_date")
+    # Convert promised_date to datetime for correct date sorting.
+    pending_orders["promised_date_sort"] = pd.to_datetime(
+        pending_orders["promised_date"],
+        errors="coerce"
+    )
+
+    pending_orders = pending_orders.sort_values(
+        by="promised_date_sort",
+        na_position="last"
+    )
+
+    pending_orders = pending_orders.drop(columns=["promised_date_sort"])
+
+    if limit is None:
+        return pending_orders
 
     return pending_orders.head(limit)
 
@@ -209,12 +295,15 @@ def region_is_covered(carrier_regions, order_region):
     order_region = "South"
     """
 
+    if pd.isna(order_region):
+        return False
+
     regions = [
         region.strip().lower()
         for region in str(carrier_regions).split(",")
     ]
 
-    return order_region.strip().lower() in regions
+    return str(order_region).strip().lower() in regions
 
 
 def calculate_shipping_cost(base_cost, cost_per_kg, weight_kg, qty):
@@ -228,6 +317,45 @@ def calculate_shipping_cost(base_cost, cost_per_kg, weight_kg, qty):
     cost = base_cost + (cost_per_kg * total_weight)
 
     return round(cost, 2), round(total_weight, 2)
+
+
+def check_delay_risk(order_date, promised_date, eta_days):
+    """
+    Check whether expected delivery date may cross promised date.
+
+    Important:
+    This uses order_date + ETA instead of today's date.
+    That is safer for demo datasets that may contain older dates.
+    """
+
+    try:
+        order_dt = pd.to_datetime(order_date, errors="coerce")
+        promised_dt = pd.to_datetime(promised_date, errors="coerce")
+
+        if pd.isna(order_dt) or pd.isna(promised_dt):
+            return {
+                "delivery_risk": "DATE_CHECK_FAILED",
+                "expected_delivery_date": "UNKNOWN"
+            }
+
+        expected_delivery = order_dt + timedelta(days=int(eta_days))
+
+        if expected_delivery > promised_dt:
+            return {
+                "delivery_risk": "DELAY_RISK",
+                "expected_delivery_date": expected_delivery.date().isoformat()
+            }
+
+        return {
+            "delivery_risk": "ON_TIME",
+            "expected_delivery_date": expected_delivery.date().isoformat()
+        }
+
+    except Exception:
+        return {
+            "delivery_risk": "DATE_CHECK_FAILED",
+            "expected_delivery_date": "UNKNOWN"
+        }
 
 
 def get_carrier_rates(ship_to_region, weight_kg, qty):
@@ -249,8 +377,8 @@ def get_carrier_rates(ship_to_region, weight_kg, qty):
             continue
 
         cost, total_weight = calculate_shipping_cost(
-            base_cost=carrier["base_cost"],
-            cost_per_kg=carrier["cost_per_kg"],
+            base_cost=float(carrier["base_cost"]),
+            cost_per_kg=float(carrier["cost_per_kg"]),
             weight_kg=weight_kg,
             qty=qty
         )
@@ -261,8 +389,8 @@ def get_carrier_rates(ship_to_region, weight_kg, qty):
                 "carrier_name": carrier["carrier_name"],
                 "service_level": carrier["service_level"],
                 "cost": cost,
-                "eta_days": carrier["eta_days"],
-                "reliability": carrier["reliability"],
+                "eta_days": int(carrier["eta_days"]),
+                "reliability": float(carrier["reliability"]),
                 "total_weight_kg": total_weight,
                 "regions_covered": carrier["regions_covered"]
             }
@@ -284,7 +412,7 @@ def choose_best_carrier(rates, optimization_mode="balanced"):
     if not rates:
         return None
 
-    optimization_mode = optimization_mode.lower().strip()
+    optimization_mode = validate_mode(optimization_mode)
 
     # Cheapest mode
     if optimization_mode == "cheapest":
@@ -367,6 +495,19 @@ def create_mock_shipment(order_id, carrier_id):
     }
 
 
+def create_pending_approval_shipment():
+    """
+    Used when the shipment requires manager approval.
+    This avoids confirming shipment before approval.
+    """
+
+    return {
+        "shipment_status": "PENDING_MANAGER_APPROVAL",
+        "tracking_id": "PENDING_MANAGER_APPROVAL",
+        "message": "Shipment requires manager approval before confirmation."
+    }
+
+
 def build_shipping_plan(limit=10, optimization_mode="balanced"):
     """
     Main business function.
@@ -377,15 +518,18 @@ def build_shipping_plan(limit=10, optimization_mode="balanced"):
     3. Finds valid carriers
     4. Calculates carrier cost
     5. Chooses best carrier
-    6. Creates mock shipment
-    7. Returns complete shipping plan
+    6. Checks delivery risk and approval requirement
+    7. Creates mock shipment only if no manager approval is needed
+    8. Returns complete shipping plan
     """
 
+    optimization_mode = validate_mode(optimization_mode)
     orders = get_pending_orders(limit)
     products = load_products()
 
     shipping_plan = []
     exceptions = []
+    approval_required_count = 0
 
     for _, order in orders.iterrows():
 
@@ -403,11 +547,41 @@ def build_shipping_plan(limit=10, optimization_mode="balanced"):
 
         product = product_row.iloc[0]
 
+        try:
+            qty = int(order["qty"])
+            weight_kg = float(product["weight_kg"])
+        except Exception:
+            exceptions.append(
+                {
+                    "order_id": order["order_id"],
+                    "issue": "Invalid quantity or product weight."
+                }
+            )
+            continue
+
+        if qty <= 0:
+            exceptions.append(
+                {
+                    "order_id": order["order_id"],
+                    "issue": "Invalid order quantity. Quantity must be greater than zero."
+                }
+            )
+            continue
+
+        if weight_kg <= 0:
+            exceptions.append(
+                {
+                    "order_id": order["order_id"],
+                    "issue": "Invalid product weight. Weight must be greater than zero."
+                }
+            )
+            continue
+
         # Get carrier rates for the order region and product weight
         rates = get_carrier_rates(
             ship_to_region=order["ship_to_region"],
-            weight_kg=float(product["weight_kg"]),
-            qty=int(order["qty"])
+            weight_kg=weight_kg,
+            qty=qty
         )
 
         if not rates:
@@ -425,11 +599,44 @@ def build_shipping_plan(limit=10, optimization_mode="balanced"):
             optimization_mode=optimization_mode
         )
 
-        # Create mock shipment
-        shipment = create_mock_shipment(
-            order_id=order["order_id"],
-            carrier_id=chosen_carrier["carrier_id"]
+        risk_info = check_delay_risk(
+            order_date=order.get("order_date", None),
+            promised_date=order["promised_date"],
+            eta_days=chosen_carrier["eta_days"]
         )
+
+        delivery_risk = risk_info["delivery_risk"]
+        expected_delivery_date = risk_info["expected_delivery_date"]
+
+        approval_required = False
+        approval_reasons = []
+
+        if delivery_risk == "DELAY_RISK":
+            approval_required = True
+            approval_reasons.append(
+                "Carrier ETA may exceed promised delivery date."
+            )
+
+        if chosen_carrier["total_weight_kg"] > MAX_SHIPMENT_WEIGHT_KG:
+            approval_required = True
+            approval_reasons.append(
+                "High shipment weight / overorder detected."
+            )
+
+        if chosen_carrier["cost"] > HIGH_SHIPPING_COST_LIMIT:
+            approval_required = True
+            approval_reasons.append(
+                "High shipping cost detected."
+            )
+
+        if approval_required:
+            approval_required_count += 1
+            shipment = create_pending_approval_shipment()
+        else:
+            shipment = create_mock_shipment(
+                order_id=order["order_id"],
+                carrier_id=chosen_carrier["carrier_id"]
+            )
 
         shipping_plan.append(
             {
@@ -437,9 +644,11 @@ def build_shipping_plan(limit=10, optimization_mode="balanced"):
                 "customer_id": order["customer_id"],
                 "sku": order["sku"],
                 "product_name": product["product_name"],
-                "qty": int(order["qty"]),
+                "qty": qty,
                 "ship_to_region": order["ship_to_region"],
+                "order_date": order.get("order_date", "UNKNOWN"),
                 "promised_date": order["promised_date"],
+                "expected_delivery_date": expected_delivery_date,
                 "total_weight_kg": chosen_carrier["total_weight_kg"],
                 "chosen_carrier": chosen_carrier["carrier_name"],
                 "carrier_id": chosen_carrier["carrier_id"],
@@ -448,6 +657,10 @@ def build_shipping_plan(limit=10, optimization_mode="balanced"):
                 "eta_days": chosen_carrier["eta_days"],
                 "reliability": chosen_carrier["reliability"],
                 "tracking_id": shipment["tracking_id"],
+                "shipment_status": shipment["shipment_status"],
+                "delivery_risk": delivery_risk,
+                "approval_required": approval_required,
+                "approval_reasons": approval_reasons,
                 "optimization_mode": optimization_mode
             }
         )
@@ -467,6 +680,7 @@ def build_shipping_plan(limit=10, optimization_mode="balanced"):
         "total_orders_planned": len(shipping_plan),
         "total_shipping_cost": total_cost,
         "average_eta_days": average_eta,
+        "approval_required_count": approval_required_count,
         "shipping_plan": shipping_plan,
         "exceptions": exceptions
     }
@@ -490,17 +704,18 @@ def shipping_api_tool(request: str) -> str:
     limit = 5
     mode = "balanced"
 
-    request = request.lower().replace(" ", "")
+    request = str(request).lower().replace(" ", "")
 
     try:
         parts = request.split(",")
 
         for part in parts:
             if part.startswith("limit="):
-                limit = int(part.replace("limit=", ""))
+                raw_limit = part.replace("limit=", "")
+                limit = None if raw_limit == "all" else parse_positive_int(raw_limit, default=5)
 
             elif part.startswith("mode="):
-                mode = part.replace("mode=", "")
+                mode = validate_mode(part.replace("mode=", ""))
 
         result = build_shipping_plan(
             limit=limit,
@@ -514,9 +729,13 @@ def shipping_api_tool(request: str) -> str:
         output.append(f"Orders Planned: {result['total_orders_planned']}")
         output.append(f"Total Shipping Cost: {result['total_shipping_cost']}")
         output.append(f"Average ETA Days: {result['average_eta_days']}")
+        output.append(f"Approval Required Count: {result['approval_required_count']}")
         output.append("\nORDER WISE PLAN:")
 
         for item in result["shipping_plan"]:
+            approval_reasons = item["approval_reasons"]
+            approval_reason_text = "NA" if not approval_reasons else "; ".join(approval_reasons)
+
             output.append(
                 f"""
 Order ID: {item['order_id']}
@@ -525,11 +744,19 @@ SKU: {item['sku']}
 Product: {item['product_name']}
 Quantity: {item['qty']}
 Region: {item['ship_to_region']}
+Order Date: {item['order_date']}
+Promised Date: {item['promised_date']}
+Expected Delivery Date: {item['expected_delivery_date']}
 Chosen Carrier: {item['chosen_carrier']}
 Service Level: {item['service_level']}
 Shipping Cost: {item['shipping_cost']}
 ETA Days: {item['eta_days']}
 Reliability: {item['reliability']}
+Total Weight KG: {item['total_weight_kg']}
+Delivery Risk: {item['delivery_risk']}
+Approval Required: {item['approval_required']}
+Approval Reasons: {approval_reason_text}
+Shipment Status: {item['shipment_status']}
 Tracking ID: {item['tracking_id']}
 """
             )
@@ -586,12 +813,15 @@ def run_logistics_agent(question, limit=5, mode="balanced"):
     Runs the complete CrewAI Logistics & Routing Agent.
     """
 
+    mode = validate_mode(mode)
+    limit = parse_positive_int(limit, default=5) if limit is not None else None
+
     memory_text = logistic_memory.get_memory()
 
     task_description = LOGISTICS_TASK_TEMPLATE.format(
         question=question,
         memory=memory_text,
-        limit=limit,
+        limit="all" if limit is None else limit,
         mode=mode
     )
 
@@ -601,7 +831,8 @@ def run_logistics_agent(question, limit=5, mode="balanced"):
         expected_output="""
 A manager-friendly optimized fulfilment plan containing:
 summary, order-wise carrier choice, shipping cost, ETA,
-tracking ID, total cost, average ETA, and exceptions if any.
+tracking ID, total cost, average ETA, delivery risk,
+approval required status, approval reasons, and exceptions if any.
 """,
 
         agent=logistics_routing_agent
@@ -634,31 +865,38 @@ tracking ID, total cost, average ETA, and exceptions if any.
 # =====================================================
 
 def main():
-    """
-    Console entry point.
-    Run this file directly to test the Logistics & Routing Agent.
-    """
-
     print("=" * 70)
     print("HEXA SHOP - LOGISTICS & ROUTING AGENT")
     print("=" * 70)
 
-    question = input("Manager Question: ")
-    limit = input("How many pending orders do you want to plan? ")
-    mode = input("Choose mode (balanced / cheapest / fastest): ")
+    question = input("Manager Question: ").strip()
 
-    if not question.strip():
+    if not question:
         question = "Create an optimized fulfilment plan for pending orders."
 
-    if not limit.strip():
-        limit = 5
+    detected_mode = detect_mode_from_question(question)
+    detected_limit = detect_limit_from_question(question)
 
-    if not mode.strip():
-        mode = "balanced"
+    if detected_mode:
+        print(f"Detected logistics mode from question: {detected_mode}")
+        mode = detected_mode
+    else:
+        mode = input("Choose mode, optional default balanced (balanced / cheapest / fastest): ").strip()
+        mode = validate_mode(mode)
+
+    if detected_limit:
+        print(f"Detected pending order limit from question: {detected_limit}")
+        limit = detected_limit
+    elif "all" in question.lower():
+        print("Detected pending order limit from question: all")
+        limit = None
+    else:
+        limit_input = input("Pending order limit, optional default 5: ").strip()
+        limit = parse_positive_int(limit_input, default=5) if limit_input else 5
 
     result = run_logistics_agent(
         question=question,
-        limit=int(limit),
+        limit=limit,
         mode=mode
     )
 
