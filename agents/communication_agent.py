@@ -1,86 +1,98 @@
 import os
 import pandas as pd
+
 from dotenv import load_dotenv
-from typing import TypedDict
+from crewai import Agent, Task, Crew, LLM
+from crewai.tools import tool
 
-from langgraph.graph import StateGraph, START, END
-from langchain_openai import AzureChatOpenAI
-
+# ---------------------------------------------------
+# Load Environment Variables
+# ---------------------------------------------------
 
 load_dotenv()
 
-llm = AzureChatOpenAI(
-    api_version="2024-12-01-preview",
-    azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
+gpt_llm = LLM(
+    model=f"azure/{os.getenv('AZURE_OPENAI_DEPLOYMENT')}",
     api_key=os.getenv("AZURE_OPENAI_KEY"),
-    deployment_name=os.getenv("AZURE_OPENAI_DEPLOYMENT")
+    api_base=os.getenv("AZURE_OPENAI_ENDPOINT"),
+    api_version=os.getenv("AZURE_OPENAI_API_VERSION")
 )
 
-class CommunicationState(TypedDict):
-    order_id: str
-    customer_name: str
-    customer_email: str
-    customer_tier: str
-    sku: str
-    quantity: int
-    order_status: str
-    priority: str
-    email_subject: str
-    email_body: str
-    manager_summary: str
+# ---------------------------------------------------
+# Load CSV Files
+# ---------------------------------------------------
 
 customers_df = pd.read_csv("customers.csv")
 orders_df = pd.read_csv("orders.csv")
 
-print("="*60)
+print("=" * 60)
 print("HexaShop AI Customer Communication Agent")
-print("="*60)
-# print("Customers Loaded :", len(customers_df))
-# print("Orders Loaded    :", len(orders_df))
+print("=" * 60)
 
-def get_customer(order_id: str):
 
-    order = orders_df[orders_df["order_id"] == order_id]
+# ---------------------------------------------------
+# Tool 1 : Retrieve Customer Details
+# ---------------------------------------------------
+
+@tool("Get Customer Details")
+def get_customer_details(order_id: str) -> str:
+    """
+    Retrieve customer and order details using Order ID.
+    """
+
+    order = orders_df[
+        orders_df["order_id"] == order_id
+    ]
 
     if order.empty:
-        print("Invalid Order ID")
-        return None
+        return "Invalid Order ID"
 
     customer = customers_df[
-        customers_df["customer_id"] == order.iloc[0]["customer_id"]
+        customers_df["customer_id"] ==
+        order.iloc[0]["customer_id"]
     ]
 
     if customer.empty:
-        print("Customer Not Found")
-        return None
+        return "Customer Not Found"
 
-    return {
-        "order_id": order.iloc[0]["order_id"],
-        "customer_name": customer.iloc[0]["customer_name"],
-        "customer_email": customer.iloc[0]["email"],
-        "customer_tier": customer.iloc[0]["tier"],
-        "sku": order.iloc[0]["sku"],
-        "quantity": order.iloc[0]["qty"],
-        "order_status": order.iloc[0]["status"],
-        "order_date": order.iloc[0]["order_date"],
-        "promised_date": order.iloc[0]["promised_date"],
-        "region": customer.iloc[0]["region"]
-    }
+    return f"""
+Customer Name : {customer.iloc[0]['customer_name']}
+Customer Email : {customer.iloc[0]['email']}
+Customer Tier : {customer.iloc[0]['tier']}
+Region : {customer.iloc[0]['region']}
 
-def get_priority(status, tier):
+Order ID : {order.iloc[0]['order_id']}
+Product SKU : {order.iloc[0]['sku']}
+Quantity : {order.iloc[0]['qty']}
+Order Status : {order.iloc[0]['status']}
+Order Date : {order.iloc[0]['order_date']}
+Promised Date : {order.iloc[0]['promised_date']}
+"""
 
-    status = str(status).upper()
-    tier = str(tier).upper()
+
+# ---------------------------------------------------
+# Business Logic
+# ---------------------------------------------------
+
+def calculate_priority(status: str, tier: str):
+
+    status = status.upper()
+    tier = tier.upper()
 
     if status == "CANCELLED":
         return "HIGH"
 
     elif status == "DELAYED":
+
         if tier == "PREMIUM":
             return "HIGH"
+
         return "MEDIUM"
 
     elif status == "PENDING":
+        return "MEDIUM"
+
+    elif status == "ALLOCATED":
         return "MEDIUM"
 
     elif status == "SHIPPED":
@@ -92,183 +104,191 @@ def get_priority(status, tier):
     return "LOW"
 
 
-def communication_agent(state: CommunicationState):
-    customer = get_customer(state["order_id"])
+# ---------------------------------------------------
+# Agent
+# ---------------------------------------------------
 
-    if customer is None:
-        return {}
+communication_agent = Agent(
 
-    priority = get_priority(
-        customer["order_status"],
-        customer["customer_tier"]
+    role="Customer Communication Specialist",
+
+    goal="Generate professional customer emails.",
+
+    backstory="""
+You are a professional customer communication expert.
+Generate only the final response.
+Do not use tools.
+""",
+
+    llm=gpt_llm,
+
+    verbose=False,
+
+    allow_delegation=False
+)
+# ---------------------------------------------------
+# Main Program
+# ---------------------------------------------------
+
+while True:
+
+    order_id = input("\nEnter Order ID (or exit): ").strip()
+
+    if order_id.lower() in ["exit", "quit"]:
+        print("\nThank you for using HexaShop AI Communication Agent.")
+        break
+
+    # ---------------------------------------------
+    # Fetch Customer & Order Details
+    # ---------------------------------------------
+
+    order = orders_df[
+        orders_df["order_id"] == order_id
+    ]
+
+    if order.empty:
+        print("Invalid Order ID")
+        continue
+
+    customer = customers_df[
+        customers_df["customer_id"] ==
+        order.iloc[0]["customer_id"]
+    ]
+
+    if customer.empty:
+        print("Customer Not Found")
+        continue
+
+    priority = calculate_priority(
+        order.iloc[0]["status"],
+        customer.iloc[0]["tier"]
     )
 
-    print("Customer Name :", customer["customer_name"])
-    print("Customer Tier :", customer["customer_tier"])
-    print("Customer Email:", customer["customer_email"])
-    print("Order ID      :", customer["order_id"])
-    print("Product SKU   :", customer["sku"])
-    print("Quantity      :", customer["quantity"])
-    print("Order Status  :", customer["order_status"])
+    print("\nCustomer Details")
+    print("-" * 60)
+    print("Customer Name :", customer.iloc[0]["customer_name"])
+    print("Customer Email:", customer.iloc[0]["email"])
+    print("Customer Tier :", customer.iloc[0]["tier"])
+    print("Order ID      :", order.iloc[0]["order_id"])
+    print("Product SKU   :", order.iloc[0]["sku"])
+    print("Quantity      :", order.iloc[0]["qty"])
+    print("Order Status  :", order.iloc[0]["status"])
     print("Priority      :", priority)
 
-    print("\nGenerating AI Communication...\n")
-
     prompt = f"""
-You are a customer communication agent.
+You are HexaShop's AI Customer Communication Specialist.
 
-Customer:
-Name: {customer["customer_name"]}
-Tier: {customer["customer_tier"]}
-Order ID: {customer["order_id"]}
-SKU: {customer["sku"]}
-Qty: {customer["quantity"]}
-Status: {customer["order_status"]}
-Priority: {priority}
+Customer Name : {customer.iloc[0]["customer_name"]}
+Customer Email : {customer.iloc[0]["email"]}
+Customer Tier : {customer.iloc[0]["tier"]}
 
-Write:
-1. Subject
-2. Customer email
-3. Manager summary (NA if priority is not HIGH)
+Order ID : {order.iloc[0]["order_id"]}
+SKU : {order.iloc[0]["sku"]}
+Quantity : {order.iloc[0]["qty"]}
+Order Status : {order.iloc[0]["status"]}
+Priority : {priority}
 
-Use the order status to decide the message.
+Generate a professional response.
 
-Format:
+Rules:
+
+1. Write a meaningful email subject.
+2. Write a professional customer email.
+3. If Priority is HIGH generate a short Manager Summary.
+4. Otherwise Manager Summary should be NA.
+5. Do not invent customer information.
+6. Keep the email concise and professional.
+
+Return ONLY in this format.
+
 Subject:
 Email:
 Manager Summary:
 """
 
-    response = llm.invoke(prompt)
+    communication_task = Task(
 
-    output = response.content
-    
+    description=prompt,
+
+    expected_output="""
+Return ONLY this format.
+
+Subject:
+Email:
+Manager Summary:
+""",
+
+    agent=communication_agent
+)
+
+    crew = Crew(
+
+        agents=[communication_agent],
+
+        tasks=[communication_task],
+
+        verbose=False
+    )
+
+    print("\nGenerating AI Communication...\n")
+
+    result = crew.kickoff()
+
+    output = str(result)
 
     subject = ""
-    email = ""
-    manager = ""
+email = ""
+manager = ""
 
-    current = ""
+current = None
 
-    for line in output.splitlines():
+for line in output.splitlines():
 
-        line = line.strip()
+    line = line.strip()
 
-        if line.startswith("Subject:"):
-            subject = line.replace("Subject:", "").strip()
-            continue
+    if line.lower().startswith("subject:"):
+        current = "subject"
+        subject = line.split(":", 1)[1].strip()
+        continue
 
-        elif line.startswith("Email"):
-            current = "email"
-            continue
+    elif line.lower().startswith("email:"):
+        current = "email"
+        email = line.split(":", 1)[1].strip()
+        continue
 
-        elif line.startswith("Manager Summary"):
-            current = "manager"
-            continue
+    elif line.lower().startswith("manager summary:"):
+        current = "manager"
+        manager = line.split(":", 1)[1].strip()
+        continue
 
-        if current == "subject":
-            subject += line + "\n"
+    if current == "subject":
+        subject += "\n" + line
 
-        elif current == "email":
-            email += line + "\n"
+    elif current == "email":
+        email += "\n" + line
 
-        elif current == "manager":
-            manager += line + "\n"
+    elif current == "manager":
+        manager += "\n" + line
 
-   
 
-    print("\nEmail")
-    print("--------------------------------------")
-    print("Subject: ",subject)
-    print("--------------------------------------")
-    print(email)
+    print("\n" + "=" * 60)
+    print("Email")
+    print("=" * 60)
+
+    print("\nSubject",subject.strip())
+    print("-" * 60)
+    print(email.strip())
 
     print("\nManager Summary")
-    print("--------------------------------------")
-    print(manager)
+    print("-" * 60)
 
-    return {
+    if manager.strip() == "":
+        print("NA")
+    else:
+        print(manager.strip())
 
-        "customer_name": customer["customer_name"],
+    print("\n" + "=" * 60)
+    print("Communication Generated Successfully")
+    print("=" * 60)
 
-        "customer_email": customer["customer_email"],
-
-        "customer_tier": customer["customer_tier"],
-
-        "sku": customer["sku"],
-
-        "quantity": customer["quantity"],
-
-        "order_status": customer["order_status"],
-
-        "priority": priority,
-
-        "email_subject": subject,
-
-        "email_body": email,
-
-        "manager_summary": manager
-
-    }
-
-communication_graph = StateGraph(CommunicationState)
-
-communication_graph.add_node(
-    "Communication Agent",
-    communication_agent
-)
-
-communication_graph.add_edge(
-    START,
-    "Communication Agent"
-)
-
-communication_graph.add_edge(
-    "Communication Agent",
-    END
-)
-
-communicationAgent = communication_graph.compile()
-
-if __name__ == "__main__":
-
-    order_number = input(
-        "\nEnter Order ID : "
-    ).strip()
-
-    try:
-
-        response = communicationAgent.invoke(
-
-            {
-
-                "order_id": order_number,
-
-                "customer_name": "",
-
-                "customer_email": "",
-
-                "customer_tier": "",
-
-                "sku": "",
-
-                "quantity": 0,
-
-                "order_status": "",
-
-                "priority": "",
-
-                "email_subject": "",
-
-                "email_body": "",
-
-                "manager_summary": ""
-
-            }
-
-        )
-    except Exception as ex:
-
-        print("\nApplication Error")
-
-        print(ex)
+    print("\nReady to send notification.")
