@@ -5,11 +5,14 @@ from pathlib import Path
 from uuid import uuid4
 from crewai import Crew, Task, Process
 
-from agents.agent import get_procurement_agent
-from prompts.prompt import PROCUREMENT_PROMPT
-from tools.supplier_tool import SupplierTool
-from tools.calculator_tool import CalculatorTool
-from tools.approval_tool import ApprovalTool
+from agents.procurement_agent import (
+    get_procurement_agent,
+    PROCUREMENT_PROMPT,
+    SupplierTool,
+    CalculatorTool,
+    ApprovalTool,
+)
+
 
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 
